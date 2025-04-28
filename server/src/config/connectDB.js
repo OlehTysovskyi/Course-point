@@ -5,13 +5,11 @@ async function connectDB() {
     try {
         let mongoUri = process.env.MONGO_URI;
 
-        if (!mongoUri || mongoUri.trim() === '') {
+        if (process.env.NODE_ENV === 'test' || !mongoUri) {
             const mongoServer = await MongoMemoryServer.create();
             mongoUri = mongoServer.getUri();
             console.log('Running in-memory MongoDB server');
         }
-
-        mongoose.set('strictQuery', true); // Поправимо Warning
 
         await mongoose.connect(mongoUri, {
             useNewUrlParser: true,
