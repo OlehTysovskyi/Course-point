@@ -1,4 +1,4 @@
-import { requestApi } from "@/api/requestApi";
+import { requestApi } from "../api/requestApi";
 
 interface LoginData {
   email: string;
@@ -9,7 +9,7 @@ interface RegisterData extends LoginData {
   role: "student" | "teacher";
 }
 
-interface User {
+export interface User {
   id: string;
   email: string;
   role: "student" | "teacher" | "admin";
@@ -17,12 +17,12 @@ interface User {
 
 export const authService = {
   login: async (email: string, password: string): Promise<User> => {
-    const response = await requestApi.post("/auth/login", { email, password });
+    const response = await requestApi.post<{ user: User }>("/auth/login", { email, password });
     return response.data.user;
   },
 
-  register: async (email: string, password: string, role: "student" | "teacher"): Promise<void> => {
-    await requestApi.post("/auth/register", { email, password, role });
+  register: async (data: RegisterData): Promise<void> => {
+    await requestApi.post("/auth/register", data);
   },
 
   logout: async (): Promise<void> => {
@@ -30,7 +30,7 @@ export const authService = {
   },
 
   getCurrentUser: async (): Promise<User> => {
-    const response = await requestApi.get("/auth/me");
+    const response = await requestApi.get<{ user: User }>("/auth/me");
     return response.data.user;
   },
 };
