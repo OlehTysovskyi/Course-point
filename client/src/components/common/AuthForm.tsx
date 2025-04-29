@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 type Props = {
   title: string;
   showRole?: boolean;
+  onSuccess?: () => void;
 };
 
-export default function AuthForm({ title, showRole = false }: Props) {
+export default function AuthForm({ title, showRole = false, onSuccess }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -27,29 +28,26 @@ export default function AuthForm({ title, showRole = false }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    if (showRole) {
-      if (password !== confirmPassword) {
-        return setError("Паролі не збігаються");
-      }
-      if (!validatePassword(password)) {
-        return setError(
-          "Пароль повинен містити щонайменше 8 символів, великі та малі літери, цифру і спецсимвол"
-        );
-      }
-    }
-
     setLoading(true);
+
     try {
       if (showRole) {
+        if (password !== confirmPassword) {
+          return setError("Паролі не збігаються");
+        }
+        if (!validatePassword(password)) {
+          return setError(
+            "Пароль повинен містити щонайменше 8 символів, великі та малі літери, цифру і спецсимвол"
+          );
+        }
         await register(email, password, role);
+        onSuccess ? onSuccess() : navigate("/login");
       } else {
         await login(email, password);
+        navigate("/");
       }
-
-      navigate("/"); // або куди треба
     } catch (err: any) {
-      setError(err.message || "Помилка");
+      setError(err.message || "Сталася помилка");
     } finally {
       setLoading(false);
     }
@@ -63,9 +61,7 @@ export default function AuthForm({ title, showRole = false }: Props) {
       >
         <h2 className="text-2xl font-semibold mb-6 text-center">{title}</h2>
 
-        {error && (
-          <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
-        )}
+        {error && <p className="text-red-600 text-sm mb-4 text-center">{error}</p>}
 
         <input
           type="email"
@@ -111,7 +107,6 @@ export default function AuthForm({ title, showRole = false }: Props) {
               value={role}
               onChange={(e) => setRole(e.target.value as "student" | "teacher")}
               className="w-full mb-4 p-2 border rounded-md"
-              required
             >
               <option value="student">Студент</option>
               <option value="teacher">Викладач</option>

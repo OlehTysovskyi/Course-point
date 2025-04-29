@@ -23,7 +23,7 @@ export const useAuth = () => {
   return context;
 };
 
-const USE_MOCK = true; // змінити на false, коли буде бекенд
+const USE_MOCK = true; // Змінити на false при підключенні бекенду
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       if (USE_MOCK) {
         await new Promise((res) => setTimeout(res, 500));
-        setUser({ id: "123", email, role: "student" });
+        setUser({ id: "mock-id", email, role: "student" });
         return;
       }
 
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => setUser(null);
 
   useEffect(() => {
-    setLoading(false); // Поки що нічого не завантажуємо
+    setLoading(false); // Можна реалізувати перевірку сесії тут
   }, []);
 
   return (
