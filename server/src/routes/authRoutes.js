@@ -1,5 +1,10 @@
 const router = require('express').Router();
-const { requestSignup, register, login } = require('../controllers/authController');
+const {
+    requestSignup,
+    approveSignup,
+    login
+} = require('../controllers/authController');
+const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
 /**
  * @swagger
@@ -12,7 +17,7 @@ const { requestSignup, register, login } = require('../controllers/authControlle
  * @swagger
  * /auth/request:
  *   post:
- *     summary: Надіслати запит на реєстрацію
+ *     summary: Надіслати запит на реєстрацію (включно з паролем)
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -20,51 +25,51 @@ const { requestSignup, register, login } = require('../controllers/authControlle
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - email
- *               - role
+ *             required: [name, email, role, password]
  *             properties:
  *               name:
  *                 type: string
  *               email:
  *                 type: string
+ *                 format: email
  *               role:
  *                 type: string
  *                 enum: [student, teacher]
+ *               password:
+ *                 type: string
  *     responses:
  *       201:
- *         description: Запит створено
+ *         description: Заявка створена
  */
 router.post('/request', requestSignup);
 
 /**
  * @swagger
- * /auth/register/{requestId}:
- *   post:
- *     summary: Реєстрація користувача по заявці
+ * /auth/request/{id}/approve:
+ *   patch:
+ *     summary: Адмін затверджує заявку та створює акаунт
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: requestId
+ *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: ID заявки
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               password:
- *                 type: string
+ *         description: ObjectId заявки
  *     responses:
- *       201:
- *         description: Користувач створений
+ *       200:
+ *         description: Акаунт створено, заявка затверджена
+ *       404:
+ *         description: Заявка не знайдена
  */
-router.post('/register/:requestId', register);
+router.patch(
+    '/request/:id/approve',
+    protect,
+    restrictTo('admin'),
+    approveSignup
+);
 
 /**
  * @swagger
@@ -78,6 +83,7 @@ router.post('/register/:requestId', register);
  *         application/json:
  *           schema:
  *             type: object
+ *             required: [email, password]
  *             properties:
  *               email:
  *                 type: string
@@ -85,7 +91,7 @@ router.post('/register/:requestId', register);
  *                 type: string
  *     responses:
  *       200:
- *         description: Успішна авторизація
+ *         description: Повертає JWT-токен
  */
 router.post('/login', login);
 

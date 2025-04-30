@@ -14,6 +14,24 @@ const options = {
             },
         ],
         components: {
+            // у definition.components додай:
+            components: {
+                schemas: {
+                    RegistrationRequest: {
+                        type: 'object',
+                        properties: {
+                            _id: { type: 'string' },
+                            name: { type: 'string' },
+                            email: { type: 'string', format: 'email' },
+                            role: { type: 'string', enum: ['student', 'teacher'] },
+                            status: { type: 'string', enum: ['pending', 'approved', 'completed'] },
+                            createdAt: { type: 'string', format: 'date-time' }
+                        }
+                    }
+                },
+                /* securitySchemes, etc. */
+            },
+
             securitySchemes: {
                 bearerAuth: {
                     type: 'http',
