@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { authService } from "@/services/authService"; // сервіс для роботи з апі
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 interface User {
   id: string;
@@ -20,21 +19,35 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
 
+const USE_MOCK = true; // Змінити на false при підключенні бекенду
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const loggedUser = await authService.login(email, password);
-      setUser(loggedUser);
+      if (USE_MOCK) {
+        await new Promise((res) => setTimeout(res, 500));
+        setUser({ id: "mock-id", email, role: "student" });
+        return;
+      }
+
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Помилка логіну");
+
+      setUser(data.user);
     } finally {
       setLoading(false);
     }
@@ -43,40 +56,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (email: string, password: string, role: "student" | "teacher") => {
     setLoading(true);
     try {
-      await authService.register(email, password, role);
+      if (USE_MOCK) {
+        await new Promise((res) => setTimeout(res, 500));
+        return;
+      }
+
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, role }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Помилка реєстрації");
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = () => {
-    authService.logout();
-    setUser(null);
-  };
+  const logout = () => setUser(null);
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSession();
+    setLoading(false); // Можна реалізувати перевірку сесії тут
   }, []);
 
-  const value: AuthContextType = {
-    user,
-    isAuthenticated: !!user,
-    loading,
-    login,
-    logout,
-    register,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{ user, isAuthenticated: !!user, loading, login, logout, register }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };

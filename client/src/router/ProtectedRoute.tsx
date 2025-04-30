@@ -1,13 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
-import LoginPage from "@/pages/LoginPage";
-import RegisterPage from "@/pages/RegisterPage";
-import HomePage from "@/pages/HomePage";
-import StudentPage from "@/pages/StudentPage";
-import TeacherPage from "@/pages/TeacherPage";
-import AdminPage from "@/pages/AdminPage";
-import NotFoundPage from "@/pages/NotFoundPage";
+import LoginPage from "../pages/LoginPage";
+import RegisterPage from "../pages/RegisterPage";
+import HomePage from "../pages/HomePage";
+import StudentPage from "../pages/StudentPage";
+import TeacherPage from "../pages/TeacherPage";
+import AdminPage from "../pages/AdminPage";
+import NotFoundPage from "../pages/NotFoundPage";
+import { JSX } from "react";
 
 function ProtectedRoute({ children, allowedRoles }: { children: JSX.Element; allowedRoles?: ("student" | "teacher" | "admin")[] }) {
   const { isAuthenticated, user, loading } = useAuth();
