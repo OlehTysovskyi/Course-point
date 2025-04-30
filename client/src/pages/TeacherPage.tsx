@@ -1,35 +1,22 @@
-import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function TeacherPage() {
-  const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
-    <div>
-      <h1>Кабінет викладача</h1>
-      <p>Вітаємо, {user?.email}</p>
+    <div className="max-w-4xl mx-auto py-12 px-4">
+      <h1 className="text-3xl font-bold mb-6">Кабінет викладача</h1>
 
-      {/* Список моїх курсів */}
-      <section>
-        <h2>Мої курси</h2>
-        <ul>
-          <li>
-            Назва курсу: Frontend
-            <ul>
-              <li>Студент: Іван Іванов — <button>Схвалити</button> <button>Відхилити</button></li>
-              <li>Студент: Олена Петренко — <button>Схвалити</button> <button>Відхилити</button></li>
-            </ul>
-          </li>
-        </ul>
-      </section>
+      <p className="mb-4 text-gray-700">
+        Тут ви можете керувати своїми курсами, створювати нові та переглядати статистику.
+      </p>
 
-      {/* Додати новий курс */}
-      <section>
-        <h2>Додати новий курс</h2>
-        <form>
-          <input type="text" placeholder="Назва курсу" />
-          <button type="submit">Додати</button>
-        </form>
-      </section>
+      <button
+        onClick={() => navigate("/teacher/create-course")}
+        className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-medium"
+      >
+        ➕ Створити новий курс
+      </button>
     </div>
   );
 }
