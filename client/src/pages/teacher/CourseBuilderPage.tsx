@@ -1,67 +1,47 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-interface CourseElement {
-  id: string;
-  type: "lesson" | "module";
-  title: string;
-}
+export default function CourseBuilderPage() {
+  const navigate = useNavigate();
 
-export default function CourseBuilder() {
-  const [elements, setElements] = useState<CourseElement[]>([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
-  const addElement = (type: "lesson" | "module") => {
-    const newElement: CourseElement = {
-      id: crypto.randomUUID(),
-      type,
-      title: type === "lesson" ? "Новий урок" : "Новий модуль",
-    };
-    setElements((prev) => [...prev, newElement]);
-  };
-
-  const removeElement = (id: string) => {
-    setElements((prev) => prev.filter((el) => el.id !== id));
+  const handleCreate = () => {
+    // TODO: Запит до API для створення курсу
+    // Після створення - перейти на сторінку редагування модулів
+    navigate("/teacher/edit-course/123"); // 123 замінити на id з відповіді
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Конструктор курсу</h1>
+    <div className="max-w-3xl mx-auto py-10 px-4">
+      <h2 className="text-2xl font-bold mb-4">Створення нового курсу</h2>
 
-      <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => addElement("lesson")}
-          className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
-        >
-          + Додати урок
-        </button>
-        <button
-          onClick={() => addElement("module")}
-          className="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700"
-        >
-          + Додати модуль
-        </button>
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Назва курсу</label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full border px-4 py-2 rounded-md"
+        />
       </div>
 
-      <div className="space-y-4">
-        {elements.map((el, index) => (
-          <div
-            key={el.id}
-            className="flex justify-between items-center border p-4 rounded-xl bg-white shadow"
-          >
-            <div>
-              <h3 className="text-lg font-semibold">
-                {index + 1}. {el.title}
-              </h3>
-              <p className="text-sm text-gray-500">Тип: {el.type === "lesson" ? "Урок" : "Модуль"}</p>
-            </div>
-            <button
-              onClick={() => removeElement(el.id)}
-              className="text-red-600 hover:underline"
-            >
-              Видалити
-            </button>
-          </div>
-        ))}
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Опис курсу</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full border px-4 py-2 rounded-md"
+        />
       </div>
+
+      <button
+        onClick={handleCreate}
+        className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+      >
+        Створити курс
+      </button>
     </div>
   );
 }

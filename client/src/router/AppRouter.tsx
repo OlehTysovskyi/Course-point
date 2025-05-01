@@ -2,13 +2,15 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 import MainLayout from "../components/layout/MainLayout";
-import LoginPage from "../pages/LoginPage";
-import RegisterPage from "../pages/RegisterPage";
+import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
 import HomePage from "../pages/HomePage";
-import StudentPage from "../pages/StudentPage";
-import TeacherPage from "../pages/TeacherPage";
+import StudentPage from "../pages/student/StudentPage";
+import TeacherPage from "../pages/teacher/TeacherPage";
 import CourseBuilderPage from "../pages/teacher/CourseBuilderPage";
-import AdminPage from "../pages/AdminPage";
+import EditCoursePage from "../pages/teacher/EditCoursePage";
+import EditLessonPage from "../pages/teacher/lesson/EditLessonPage";
+import AdminPage from "../pages/admin/AdminPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import { JSX } from "react";
 
@@ -58,6 +60,22 @@ export default function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
               <CourseBuilderPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/edit-course/:courseId"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <EditCoursePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/edit-lesson/:lessonId"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <EditLessonPage />
             </ProtectedRoute>
           }
         />

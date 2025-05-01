@@ -1,4 +1,4 @@
-import AuthForm from "../components/common/AuthForm";
+import AuthForm from "../../components/layout/AuthForm";
 
 export default function LoginPage() {
   return <AuthForm title="Вхід" />;
