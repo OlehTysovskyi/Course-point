@@ -1,0 +1,6 @@
+/* styles.css */
+.home {
+    @apply bg-cover bg-no-repeat bg-center;
+    background-image: url("/src/assets/main-bg.jpg");
+    background-attachment: fixed;
+}
