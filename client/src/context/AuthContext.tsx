@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       if (USE_MOCK) {
         await new Promise((res) => setTimeout(res, 500));
-        setUser({ id: "mock-id", email, role: "teacher" });
+        setUser({ id: "mock-id", email, role: "student" });
         return;
       }
 
