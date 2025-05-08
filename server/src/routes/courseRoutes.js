@@ -1,5 +1,9 @@
 const router = require('express').Router();
-const { createCourse, getAllCourses } = require('../controllers/courseController');
+const {
+    createCourse,
+    getAllCourses,
+    getCourseById
+} = require('../controllers/courseController');
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
 /**
@@ -13,15 +17,43 @@ const { protect, restrictTo } = require('../middlewares/authMiddleware');
  * @swagger
  * /courses:
  *   get:
- *     summary: Отримати всі курси
+ *     summary: Отримати всі опубліковані курси
  *     tags: [Courses]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Список курсів
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Course'
  */
-router.get('/', protect, getAllCourses);
+router.get('/', getAllCourses);
+
+/**
+ * @swagger
+ * /courses/{id}:
+ *   get:
+ *     summary: Отримати курс за ID
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: ID курсу
+ *     responses:
+ *       200:
+ *         description: Дані курсу
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ *       404:
+ *         description: Курс не знайдено
+ */
+router.get('/:id', getCourseById);
 
 /**
  * @swagger
@@ -37,6 +69,9 @@ router.get('/', protect, getAllCourses);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - title
+ *               - description
  *             properties:
  *               title:
  *                 type: string
@@ -44,16 +79,27 @@ router.get('/', protect, getAllCourses);
  *                 type: string
  *               lessons:
  *                 type: array
- *                 items:
- *                   type: string
+ *                 items: { type: string }
  *               modules:
  *                 type: array
- *                 items:
- *                   type: string
+ *                 items: { type: string }
+ *               published:
+ *                 type: boolean
  *     responses:
  *       201:
  *         description: Курс створено
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ *       401:
+ *         description: Не авторизовано / недостатньо прав
  */
-router.post('/', protect, restrictTo('teacher'), createCourse);
+router.post(
+    '/',
+    protect,
+    restrictTo('teacher'),
+    createCourse
+);
 
 module.exports = router;

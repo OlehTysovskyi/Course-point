@@ -9,6 +9,8 @@ const courseRoutes = require('./routes/courseRoutes');
 const progressRoutes = require('./routes/progressRoutes');
 const badgeRoutes = require('./routes/badgeRoutes');
 const errorHandler = require('./middlewares/errorHandler');
+const lessonRoutes = require('./routes/lessonRoutes');
+const moduleRoutes = require('./routes/moduleRoutes');
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
@@ -29,6 +31,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/badges', badgeRoutes);
+app.use('/api/lessons', lessonRoutes);
+app.use('/api/modules', moduleRoutes);
 
 // Swagger
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
