@@ -1,12 +1,19 @@
-const User = require('../models/User');
+const userService = require('../services/userService');
 
 exports.getAllUsers = async (req, res, next) => {
-    const users = await User.find().select('-password');
-    res.json(users);
+    try {
+        const users = await userService.getAllUsers();
+        res.json(users);
+    } catch (err) {
+        next(err);
+    }
 };
 
 exports.getUserById = async (req, res, next) => {
-    const user = await User.findById(req.params.id).select('-password');
-    if (!user) return res.status(404).json({ message: 'Користувача не знайдено' });
-    res.json(user);
+    try {
+        const user = await userService.getUserById(req.params.id);
+        res.json(user);
+    } catch (err) {
+        next(err);
+    }
 };
