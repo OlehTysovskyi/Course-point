@@ -9,6 +9,7 @@ type Props = {
 };
 
 export default function AuthForm({ title, showRole = false, onSuccess }: Props) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -40,7 +41,7 @@ export default function AuthForm({ title, showRole = false, onSuccess }: Props) 
             "Пароль повинен містити щонайменше 8 символів, великі та малі літери, цифру і спецсимвол"
           );
         }
-        await register(email, password, role);
+        await register(email, password, role, name);
         onSuccess ? onSuccess() : navigate("/login");
       } else {
         await login(email, password);
@@ -62,6 +63,17 @@ export default function AuthForm({ title, showRole = false, onSuccess }: Props) 
         <h2 className="text-2xl font-semibold mb-6 text-center">{title}</h2>
 
         {error && <p className="text-red-600 text-sm mb-4 text-center">{error}</p>}
+
+        {showRole && ( // ДОДАНО поле ім'я тільки для реєстрації
+          <input
+            type="text"
+            placeholder="Ім'я"
+            className="w-full mb-4 p-2 border rounded-md"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        )}
 
         <input
           type="email"

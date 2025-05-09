@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { jwtDecode } from "jwt-decode"; // Фікс імпорту
 
 interface User {
   id: string;
@@ -12,7 +19,12 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (email: string, password: string, role: "student" | "teacher") => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    role: "student" | "teacher",
+    name: string
+  ) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -23,8 +35,6 @@ export const useAuth = () => {
   return context;
 };
 
-const USE_MOCK = true; // Змінити на false при підключенні бекенду
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -32,13 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      if (USE_MOCK) {
-        await new Promise((res) => setTimeout(res, 500));
-        setUser({ id: "mock-id", email, role: "student" });
-        return;
-      }
-
-      const res = await fetch("/api/login", {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -47,24 +51,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Помилка логіну");
 
-      setUser(data.user);
+      const decoded: any = jwtDecode(data.token);
+      setUser({
+        id: decoded.id,
+        email,
+        role: decoded.role,
+      });
+
+      // Зберігаємо токен для сесії (наприклад в localStorage)
+      localStorage.setItem("token", data.token);
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (email: string, password: string, role: "student" | "teacher") => {
+  const register = async (
+    email: string,
+    password: string,
+    role: "student" | "teacher",
+    name: string
+  ) => {
     setLoading(true);
     try {
-      if (USE_MOCK) {
-        await new Promise((res) => setTimeout(res, 500));
-        return;
-      }
-
-      const res = await fetch("/api/register", {
+      const res = await fetch("http://localhost:5000/api/auth/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password, role, name }),
       });
 
       const data = await res.json();
@@ -74,10 +86,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("token");
+  };
 
+  // Перевірка сесії при завантаженні
   useEffect(() => {
-    setLoading(false); // Можна реалізувати перевірку сесії тут
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded: any = jwtDecode(token);
+        setUser({
+          id: decoded.id,
+          email: decoded.email,
+          role: decoded.role,
+        });
+      } catch {
+        logout();
+      }
+    }
   }, []);
 
   return (
