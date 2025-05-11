@@ -41,7 +41,8 @@ router.get('/', getAllCourses);
  *       - in: path
  *         name: id
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *         description: ID курсу
  *     responses:
  *       200:
@@ -79,10 +80,12 @@ router.get('/:id', getCourseById);
  *                 type: string
  *               lessons:
  *                 type: array
- *                 items: { type: string }
+ *                 items:
+ *                   type: string
  *               modules:
  *                 type: array
- *                 items: { type: string }
+ *                 items:
+ *                   type: string
  *               published:
  *                 type: boolean
  *     responses:

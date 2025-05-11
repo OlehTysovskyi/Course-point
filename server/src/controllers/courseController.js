@@ -1,8 +1,12 @@
+// server/src/controllers/courseController.js
+
 const courseService = require('../services/courseService');
 
 exports.createCourse = async (req, res, next) => {
     try {
-        const course = await courseService.create(req.body, req.user._id);
+        const dto = req.body;
+        const teacherId = req.user._id;
+        const course = await courseService.createCourse(dto, teacherId);
         res.status(201).json(course);
     } catch (err) {
         next(err);
@@ -11,7 +15,7 @@ exports.createCourse = async (req, res, next) => {
 
 exports.getAllCourses = async (req, res, next) => {
     try {
-        const courses = await courseService.getAll();
+        const courses = await courseService.getAllCourses();
         res.json(courses);
     } catch (err) {
         next(err);
@@ -20,8 +24,7 @@ exports.getAllCourses = async (req, res, next) => {
 
 exports.getCourseById = async (req, res, next) => {
     try {
-        const course = await courseService.getById(req.params.id);
-        if (!course) return res.status(404).json({ message: 'Курс не знайдено' });
+        const course = await courseService.getCourseById(req.params.id);
         res.json(course);
     } catch (err) {
         next(err);

@@ -17,10 +17,12 @@ const CourseSchema = new mongoose.Schema({
     },
     lessons: [{
         type: mongoose.Schema.Types.ObjectId,
+        default: [],
         ref: 'Lesson'
     }],
     modules: [{
         type: mongoose.Schema.Types.ObjectId,
+        default: [],
         ref: 'Module'
     }],
     published: {

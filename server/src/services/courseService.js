@@ -1,34 +1,60 @@
-const Course = require('../models/Course');
+// server/src/services/courseService.js
+
+const courseRepository = require('../repositories/courseRepository');
 const CourseBuilder = require('../builders/CourseBuilder');
 
-exports.create = async (data, teacherId) => {
-    // будуємо об'єкт курсу
-    const builder = new CourseBuilder()
-        .setTitle(data.title)
-        .setDescription(data.description)
-        .setTeacher(teacherId);
+class CourseService {
+    /**
+     * Створити новий курс (перевірки + Builder → Repository)
+     * @param {Object} dto — { title, description, lessons, modules, published }
+     * @param {string} teacherId
+     */
+    async createCourse(dto, teacherId) {
+        // 1. Валідація обовʼязкових полів
+        if (!dto.title || !dto.description) {
+            const err = new Error('title та description — обовʼязкові');
+            err.statusCode = 400;
+            throw err;
+        }
 
-    // на етапі створення може бути пустий масив lessons/modules
-    (data.lessons || []).forEach(l => builder.addLesson(l));
-    (data.modules || []).forEach(m => builder.addModule(m));
+        // 2. Збір обʼєкта через Builder
+        const builder = new CourseBuilder()
+            .setTitle(dto.title)
+            .setDescription(dto.description)
+            .setTeacher(teacherId);
 
-    // за бажанням відразу публікувати
-    if (data.published) builder.setPublished(true);
+        // Додаємо уроки/модулі, якщо передані
+        (dto.lessons || []).forEach(id => builder.addLesson(id));
+        (dto.modules || []).forEach(id => builder.addModule(id));
 
-    const courseData = builder.build();
-    return Course.create(courseData);
-};
+        if (dto.published) builder.setPublished(true);
 
-exports.getAll = async () => {
-    return Course.find({ published: true })
-        .populate('teacher', 'name email')
-        .populate('lessons')
-        .populate('modules');
-};
+        const courseData = builder.build();
 
-exports.getById = async (id) => {
-    return Course.findById(id)
-        .populate('teacher', 'name email')
-        .populate('lessons')
-        .populate('modules');
-};
+        // 3. Створюємо через репозиторій
+        return courseRepository.create(courseData);
+    }
+
+    /**
+     * Повернути всі опубліковані курси
+     */
+    async getAllCourses() {
+        return courseRepository.findAllPublished();
+    }
+
+    /**
+     * Повернути курс за ID
+     * @param {string} id
+     */
+    async getCourseById(id) {
+        const course = await courseRepository.findById(id);
+        if (!course) {
+            const err = new Error('Курс не знайдено');
+            err.statusCode = 404;
+            throw err;
+        }
+        return course;
+    }
+}
+
+module.exports = new CourseService();
