@@ -1,12 +1,8 @@
-// server/src/controllers/courseController.js
-
 const courseService = require('../services/courseService');
 
 exports.createCourse = async (req, res, next) => {
     try {
-        const dto = req.body;
-        const teacherId = req.user._id;
-        const course = await courseService.createCourse(dto, teacherId);
+        const course = await courseService.createCourse(req.body, req.user._id);
         res.status(201).json(course);
     } catch (err) {
         next(err);
@@ -26,6 +22,28 @@ exports.getCourseById = async (req, res, next) => {
     try {
         const course = await courseService.getCourseById(req.params.id);
         res.json(course);
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.updateCourse = async (req, res, next) => {
+    try {
+        const updated = await courseService.updateCourse(
+            req.params.id,
+            req.body,
+            req.user._id
+        );
+        res.json(updated);
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.deleteCourse = async (req, res, next) => {
+    try {
+        await courseService.deleteCourse(req.params.id);
+        res.status(204).end();
     } catch (err) {
         next(err);
     }

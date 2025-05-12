@@ -58,6 +58,17 @@ const options = {
                         }
                     }
                 },
+                CourseInput: {
+                    type: 'object',
+                    required: ['title', 'description'],
+                    properties: {
+                        title: { type: 'string' },
+                        description: { type: 'string' },
+                        lessons: { type: 'array', items: { type: 'string' }, example: [] },
+                        modules: { type: 'array', items: { type: 'string' }, example: [] },
+                        published: { type: 'boolean', example: false }
+                    }
+                },
                 Course: {
                     type: 'object',
                     required: ['_id', 'title', 'description', 'teacher', 'published', 'createdAt', 'updatedAt'],

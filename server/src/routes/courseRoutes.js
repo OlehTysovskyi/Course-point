@@ -2,7 +2,9 @@ const router = require('express').Router();
 const {
     createCourse,
     getAllCourses,
-    getCourseById
+    getCourseById,
+    updateCourse,
+    deleteCourse
 } = require('../controllers/courseController');
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
@@ -43,7 +45,6 @@ router.get('/', getAllCourses);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID курсу
  *     responses:
  *       200:
  *         description: Дані курсу
@@ -60,7 +61,7 @@ router.get('/:id', getCourseById);
  * @swagger
  * /courses:
  *   post:
- *     summary: Створити новий курс
+ *     summary: Створити курс
  *     tags: [Courses]
  *     security:
  *       - bearerAuth: []
@@ -69,25 +70,7 @@ router.get('/:id', getCourseById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - title
- *               - description
- *             properties:
- *               title:
- *                 type: string
- *               description:
- *                 type: string
- *               lessons:
- *                 type: array
- *                 items:
- *                   type: string
- *               modules:
- *                 type: array
- *                 items:
- *                   type: string
- *               published:
- *                 type: boolean
+ *             $ref: '#/components/schemas/CourseInput'
  *     responses:
  *       201:
  *         description: Курс створено
@@ -96,13 +79,64 @@ router.get('/:id', getCourseById);
  *             schema:
  *               $ref: '#/components/schemas/Course'
  *       401:
- *         description: Не авторизовано / недостатньо прав
+ *         description: Не авторизовано
  */
-router.post(
-    '/',
-    protect,
-    restrictTo('teacher'),
-    createCourse
-);
+router.post('/', protect, restrictTo('teacher'), createCourse);
+
+/**
+ * @swagger
+ * /courses/{id}:
+ *   put:
+ *     summary: Оновити курс
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CourseInput'
+ *     responses:
+ *       200:
+ *         description: Курс оновлено
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ *       401:
+ *         description: Не авторизовано
+ *       404:
+ *         description: Курс не знайдено
+ */
+router.put('/:id', protect, restrictTo('teacher'), updateCourse);
+
+/**
+ * @swagger
+ * /courses/{id}:
+ *   delete:
+ *     summary: Видалити курс
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       204:
+ *         description: Курс видалено
+ *       401:
+ *         description: Не авторизовано
+ *       404:
+ *         description: Курс не знайдено
+ */
+router.delete('/:id', protect, restrictTo('teacher'), deleteCourse);
 
 module.exports = router;
