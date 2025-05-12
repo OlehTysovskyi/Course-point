@@ -1,16 +1,89 @@
+// server/src/routes/lessonRoutes.js
+
 const router = require('express').Router();
-const { protect, restrictTo } = require('../middlewares/authMiddleware');
 const {
     createLesson,
     getAllLessons,
     getLessonById
 } = require('../controllers/lessonController');
+const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
 /**
  * @swagger
  * tags:
  *   name: Lessons
  *   description: Керування уроками
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ContentBlock:
+ *       type: object
+ *       required:
+ *         - id
+ *         - type
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: "550e8400-e29b-41d4-a716-446655440000"
+ *         type:
+ *           type: string
+ *           enum: [heading, paragraph, list, quote, code, video, image, quiz]
+ *         level:
+ *           type: integer
+ *           description: Рівень заголовка (для type=heading)
+ *           example: 2
+ *         text:
+ *           type: string
+ *           description: Текст для paragraph|heading|quote
+ *         items:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Пункти списку (для type=list)
+ *         code:
+ *           type: string
+ *           description: Код (для type=code)
+ *         url:
+ *           type: string
+ *           description: Посилання на відео (для type=video)
+ *           format: uri
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: URL зображень (для type=image)
+ *         question:
+ *           type: string
+ *           description: Питання (для type=quiz)
+ *         answers:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Варіанти відповідей (для type=quiz)
+ *         correctIndex:
+ *           type: integer
+ *           description: Індекс правильної відповіді (для type=quiz)
+ *     Lesson:
+ *       type: object
+ *       required:
+ *         - _id
+ *         - title
+ *         - blocks
+ *       properties:
+ *         _id:
+ *           type: string
+ *         title:
+ *           type: string
+ *         blocks:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/ContentBlock'
+ *         createdAt:
+ *           type: string
+ *           format: date-time
  */
 
 /**
@@ -40,9 +113,10 @@ router.get('/', getAllLessons);
  *     parameters:
  *       - in: path
  *         name: id
- *         schema: { type: string }
  *         required: true
- *         description: ID уроку
+ *         schema:
+ *           type: string
+ *         description: ObjectId уроку
  *     responses:
  *       200:
  *         description: Дані уроку
@@ -69,20 +143,16 @@ router.get('/:id', getLessonById);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [title, content]
+ *             required:
+ *               - title
+ *               - blocks
  *             properties:
  *               title:
  *                 type: string
- *               content:
- *                 type: string
- *               videoUrl:
- *                 type: string
- *               images:
+ *               blocks:
  *                 type: array
- *                 items: { type: string }
- *               questions:
- *                 type: array
- *                 items: { type: object }
+ *                 items:
+ *                   $ref: '#/components/schemas/ContentBlock'
  *     responses:
  *       201:
  *         description: Урок створено
@@ -91,7 +161,7 @@ router.get('/:id', getLessonById);
  *             schema:
  *               $ref: '#/components/schemas/Lesson'
  *       401:
- *         description: Не авторизовано
+ *         description: Не авторизовано / недостатньо прав
  */
 router.post('/', protect, restrictTo('teacher'), createLesson);
 
