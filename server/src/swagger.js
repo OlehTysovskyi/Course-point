@@ -1,3 +1,5 @@
+// server/src/swagger.js
+
 const swaggerJSDoc = require('swagger-jsdoc');
 require('dotenv').config();
 
@@ -24,6 +26,7 @@ const options = {
                 }
             },
             schemas: {
+                // ------ RegistrationRequest ------
                 RegistrationRequest: {
                     type: 'object',
                     required: ['_id', 'name', 'email', 'role', 'status', 'createdAt'],
@@ -58,15 +61,87 @@ const options = {
                         }
                     }
                 },
+
+                // ------ UserInput & User ------
+                UserInput: {
+                    type: 'object',
+                    required: ['name', 'email', 'password', 'role'],
+                    properties: {
+                        name: {
+                            type: 'string',
+                            example: 'Олена Петрівна'
+                        },
+                        email: {
+                            type: 'string',
+                            format: 'email',
+                            example: 'olena@example.com'
+                        },
+                        password: {
+                            type: 'string',
+                            example: 'securePass123!'
+                        },
+                        role: {
+                            type: 'string',
+                            enum: ['student', 'teacher', 'admin'],
+                            example: 'teacher'
+                        }
+                    }
+                },
+                User: {
+                    type: 'object',
+                    required: ['_id', 'name', 'email', 'role', 'createdAt'],
+                    properties: {
+                        _id: {
+                            type: 'string',
+                            example: '60d5eeb2fc13ae3c28000003'
+                        },
+                        name: {
+                            type: 'string',
+                            example: 'Олена Петрівна'
+                        },
+                        email: {
+                            type: 'string',
+                            format: 'email',
+                            example: 'olena@example.com'
+                        },
+                        role: {
+                            type: 'string',
+                            enum: ['student', 'teacher', 'admin'],
+                            example: 'admin'
+                        },
+                        createdAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            example: '2025-05-07T12:45:00.123Z'
+                        }
+                    }
+                },
+
+                // ------ CourseInput & Course ------
                 CourseInput: {
                     type: 'object',
                     required: ['title', 'description'],
                     properties: {
-                        title: { type: 'string' },
-                        description: { type: 'string' },
-                        lessons: { type: 'array', items: { type: 'string' }, example: [] },
-                        modules: { type: 'array', items: { type: 'string' }, example: [] },
-                        published: { type: 'boolean', example: false }
+                        title: {
+                            type: 'string'
+                        },
+                        description: {
+                            type: 'string'
+                        },
+                        lessons: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: []
+                        },
+                        modules: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: []
+                        },
+                        published: {
+                            type: 'boolean',
+                            example: false
+                        }
                     }
                 },
                 Course: {
@@ -117,6 +192,8 @@ const options = {
                         }
                     }
                 },
+
+                // ------ Lesson ------
                 Lesson: {
                     type: 'object',
                     required: ['_id', 'title', 'content'],
@@ -130,6 +207,8 @@ const options = {
                         createdAt: { type: 'string', format: 'date-time' }
                     }
                 },
+
+                // ------ Module ------
                 Module: {
                     type: 'object',
                     required: ['_id', 'title'],
@@ -141,7 +220,6 @@ const options = {
                         createdAt: { type: 'string', format: 'date-time' }
                     }
                 }
-
             }
         },
         security: [
@@ -154,5 +232,4 @@ const options = {
 };
 
 const swaggerSpec = swaggerJSDoc(options);
-
 module.exports = swaggerSpec;

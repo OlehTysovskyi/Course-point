@@ -1,51 +1,24 @@
-// server/src/repositories/userRepository.js
-
 const User = require('../models/User');
 
 class UserRepository {
-    /**
-     * Створити нового користувача
-     * @param {Object} userData — { name, email, password, role }
-     * @returns {Promise<User>}
-     */
-    async create(userData) {
-        const user = await User.create(userData);
-        return user;
+    async create(data) {
+        return User.create(data);
     }
 
-    /**
-     * Знайти користувача за ID
-     * @param {string} id
-     * @returns {Promise<User|null>}
-     */
-    async findById(id) {
-        return User.findById(id).select('-password');
-    }
-
-    /**
-     * Знайти всіх користувачів
-     * @returns {Promise<User[]>}
-     */
     async findAll() {
         return User.find().select('-password');
     }
 
-    /**
-     * Знайти користувача за email
-     * @param {string} email
-     * @returns {Promise<User|null>}
-     */
+    async findById(id) {
+        return User.findById(id).select('-password');
+    }
+
     async findByEmail(email) {
         return User.findOne({ email });
     }
 
-    /**
-     * Оновити дані користувача
-     * @param {string} id
-     * @param {Object} updateData
-     * @returns {Promise<User|null>}
-     */
     async updateById(id, updateData) {
+        // Якщо є пароль — воно захешується в UserSchema.pre('save')
         return User.findByIdAndUpdate(id, updateData, {
             new: true,
             runValidators: true,
@@ -53,13 +26,8 @@ class UserRepository {
         });
     }
 
-    /**
-     * Видалити користувача за ID
-     * @param {string} id
-     * @returns {Promise<User|null>}
-     */
     async deleteById(id) {
-        return User.findByIdAndDelete(id);
+        return User.findByIdAndDelete(id).select('-password');
     }
 }
 
