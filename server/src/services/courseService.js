@@ -1,51 +1,32 @@
-// server/src/services/courseService.js
-
 const courseRepository = require('../repositories/courseRepository');
 const CourseBuilder = require('../builders/CourseBuilder');
 
 class CourseService {
-    /**
-     * Створити новий курс (перевірки + Builder → Repository)
-     * @param {Object} dto — { title, description, lessons, modules, published }
-     * @param {string} teacherId
-     */
     async createCourse(dto, teacherId) {
-        // 1. Валідація обовʼязкових полів
+        // валідація title/description
         if (!dto.title || !dto.description) {
             const err = new Error('title та description — обовʼязкові');
             err.statusCode = 400;
             throw err;
         }
-
-        // 2. Збір обʼєкта через Builder
+        // builder
         const builder = new CourseBuilder()
             .setTitle(dto.title)
             .setDescription(dto.description)
             .setTeacher(teacherId);
 
-        // Додаємо уроки/модулі, якщо передані
-        (dto.lessons || []).forEach(id => builder.addLesson(id));
-        (dto.modules || []).forEach(id => builder.addModule(id));
-
+        ; (dto.lessons || []).forEach(id => builder.addLesson(id));
+        ; (dto.modules || []).forEach(id => builder.addModule(id));
         if (dto.published) builder.setPublished(true);
 
         const courseData = builder.build();
-
-        // 3. Створюємо через репозиторій
         return courseRepository.create(courseData);
     }
 
-    /**
-     * Повернути всі опубліковані курси
-     */
     async getAllCourses() {
         return courseRepository.findAllPublished();
     }
 
-    /**
-     * Повернути курс за ID
-     * @param {string} id
-     */
     async getCourseById(id) {
         const course = await courseRepository.findById(id);
         if (!course) {
@@ -54,6 +35,44 @@ class CourseService {
             throw err;
         }
         return course;
+    }
+
+    async updateCourse(id, dto, teacherId) {
+        // опціонально перевірити, що викладач збігається
+        if (dto.title === '' || dto.description === '') {
+            const err = new Error('title та description не можуть бути порожніми');
+            err.statusCode = 400;
+            throw err;
+        }
+
+        // Якщо оновлюємо lessons/modules — можна перевірити типи
+        const updateData = {
+            ...dto
+        };
+        // Забезпечити, що published булевий
+        if ('published' in dto && typeof dto.published !== 'boolean') {
+            const err = new Error('published має бути булевим');
+            err.statusCode = 400;
+            throw err;
+        }
+
+        const updated = await courseRepository.updateById(id, updateData);
+        if (!updated) {
+            const err = new Error('Курс не знайдено');
+            err.statusCode = 404;
+            throw err;
+        }
+        return updated;
+    }
+
+    async deleteCourse(id) {
+        const deleted = await courseRepository.deleteById(id);
+        if (!deleted) {
+            const err = new Error('Курс не знайдено');
+            err.statusCode = 404;
+            throw err;
+        }
+        return deleted;
     }
 }
 
