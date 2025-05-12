@@ -1,1 +1,41 @@
-module.exports = {};
+// server/src/services/authService.js
+
+const jwt = require('jsonwebtoken');
+const userRepository = require('../repositories/userRepository');
+
+class AuthService {
+    /**
+     * Логінить користувача, повертає JWT
+     * @param {{ email: string, password: string }} dto
+     * @returns {Promise<string>} — токен
+     */
+    async login({ email, password }) {
+        // 1. Знайти користувача
+        const user = await userRepository.findByEmail(email);
+        if (!user) {
+            const err = new Error('Невірні облікові дані');
+            err.statusCode = 401;
+            throw err;
+        }
+
+        // 2. Перевірити пароль
+        const isMatch = await user.matchPassword(password);
+        if (!isMatch) {
+            const err = new Error('Невірні облікові дані');
+            err.statusCode = 401;
+            throw err;
+        }
+
+        // 3. Підготувати payload та підписати JWT
+        const payload = { id: user._id, role: user.role };
+        const token = jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+        );
+
+        return token;
+    }
+}
+
+module.exports = new AuthService();

@@ -1,16 +1,44 @@
 const router = require('express').Router();
-const { protect, restrictTo } = require('../middlewares/authMiddleware');
 const {
     createModule,
     getAllModules,
     getModuleById
 } = require('../controllers/moduleController');
+const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
 /**
  * @swagger
  * tags:
  *   name: Modules
  *   description: Керування модулями
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Module:
+ *       type: object
+ *       required: [ _id, title, graded, createdAt ]
+ *       properties:
+ *         _id:
+ *           type: string
+ *         title:
+ *           type: string
+ *         lessons:
+ *           type: array
+ *           items:
+ *             type: string
+ *         graded:
+ *           type: boolean
+ *           description: чи впливає на оцінку (true = оцінюваний)
+ *         questions:
+ *           type: array
+ *           items:
+ *             type: object
+ *         createdAt:
+ *           type: string
+ *           format: date-time
  */
 
 /**
@@ -40,12 +68,13 @@ router.get('/', getAllModules);
  *     parameters:
  *       - in: path
  *         name: id
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *         required: true
  *         description: ID модуля
  *     responses:
  *       200:
- *         description: Данні модуля
+ *         description: Дані модуля
  *         content:
  *           application/json:
  *             schema:
@@ -69,16 +98,23 @@ router.get('/:id', getModuleById);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [title]
+ *             required:
+ *               - title
+ *               - graded
  *             properties:
  *               title:
  *                 type: string
  *               lessons:
  *                 type: array
- *                 items: { type: string }
+ *                 items:
+ *                   type: string
+ *               graded:
+ *                 type: boolean
+ *                 example: false
  *               questions:
  *                 type: array
- *                 items: { type: object }
+ *                 items:
+ *                   type: object
  *     responses:
  *       201:
  *         description: Модуль створено
@@ -87,7 +123,7 @@ router.get('/:id', getModuleById);
  *             schema:
  *               $ref: '#/components/schemas/Module'
  *       401:
- *         description: Не авторизовано
+ *         description: Не авторизовано / недостатньо прав
  */
 router.post('/', protect, restrictTo('teacher'), createModule);
 
