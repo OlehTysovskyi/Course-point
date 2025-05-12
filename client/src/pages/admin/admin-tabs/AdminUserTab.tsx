@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getUsers, User } from '../../../services/userService';  // Імпортуємо тип User
+import { getUsers, deleteUser, User } from '../../../services/userService';
 
 export default function AdminUsersTab({ searchTerm }: { searchTerm: string }) {
     const [users, setUsers] = useState<User[] | null>(null);
@@ -9,7 +9,7 @@ export default function AdminUsersTab({ searchTerm }: { searchTerm: string }) {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const fetchedUsers = await getUsers(); 
+                const fetchedUsers = await getUsers();
                 if (Array.isArray(fetchedUsers)) {
                     setUsers(fetchedUsers);
                 } else {
@@ -25,6 +25,18 @@ export default function AdminUsersTab({ searchTerm }: { searchTerm: string }) {
 
         fetchUsers();
     }, []);
+
+    const handleDeleteUser = async (userId: string) => {
+        const confirm = window.confirm('Ви впевнені, що хочете видалити цього користувача?');
+        if (!confirm) return;
+
+        try {
+            await deleteUser(userId);
+            setUsers(prev => prev ? prev.filter(u => u._id !== userId) : null);
+        } catch (err) {
+            alert('Помилка при видаленні користувача');
+        }
+    };
 
     const filteredUsers = users ? users.filter(user =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -43,8 +55,12 @@ export default function AdminUsersTab({ searchTerm }: { searchTerm: string }) {
                         <p>Роль: {user.role}</p>
                     </div>
                     <div className="flex gap-2">
-                        <button className="px-3 py-1 bg-yellow-500 text-white rounded">Змінити роль</button>
-                        <button className="px-3 py-1 bg-red-500 text-white rounded">Деактивувати</button>
+                        <button
+                            onClick={() => handleDeleteUser(user._id)}
+                            className="px-3 py-1 bg-red-500 text-white rounded"
+                        >
+                            Деактивувати
+                        </button>
                     </div>
                 </div>
             ))}

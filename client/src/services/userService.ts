@@ -13,13 +13,15 @@ export interface User {
     role: 'student' | 'teacher' | 'admin';
 }
 
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const getUsers = async (): Promise<User[]> => {
     try {
-        const token = localStorage.getItem('token');
         const response = await axios.get<User[]>(`${API_URL}/users`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
         });
         return response.data;
     } catch (error) {
@@ -30,7 +32,9 @@ export const getUsers = async (): Promise<User[]> => {
 
 export const getUserById = async (userId: string): Promise<User> => {
     try {
-        const response = await axios.get<User>(`${API_URL}/users/${userId}`);
+        const response = await axios.get<User>(`${API_URL}/users/${userId}`, {
+            headers: getAuthHeaders(),
+        });
         return response.data;
     } catch (error) {
         console.error(`Error fetching user with ID ${userId}:`, error);
@@ -40,7 +44,9 @@ export const getUserById = async (userId: string): Promise<User> => {
 
 export const createUser = async (user: Omit<User, 'id'>): Promise<User> => {
     try {
-        const response = await axios.post<User>(`${API_URL}/users`, user);
+        const response = await axios.post<User>(`${API_URL}/users`, user, {
+            headers: getAuthHeaders(),
+        });
         return response.data;
     } catch (error) {
         console.error('Error creating user:', error);
@@ -50,7 +56,9 @@ export const createUser = async (user: Omit<User, 'id'>): Promise<User> => {
 
 export const updateUser = async (userId: string, updatedUser: Partial<User>): Promise<User> => {
     try {
-        const response = await axios.put<User>(`${API_URL}/users/${userId}`, updatedUser);
+        const response = await axios.put<User>(`${API_URL}/users/${userId}`, updatedUser, {
+            headers: getAuthHeaders(),
+        });
         return response.data;
     } catch (error) {
         console.error(`Error updating user with ID ${userId}:`, error);
@@ -60,7 +68,9 @@ export const updateUser = async (userId: string, updatedUser: Partial<User>): Pr
 
 export const deleteUser = async (userId: string): Promise<void> => {
     try {
-        await axios.delete(`${API_URL}/users/${userId}`);
+        await axios.delete(`${API_URL}/users/${userId}`, {
+            headers: getAuthHeaders(),
+        });
     } catch (error) {
         console.error(`Error deleting user with ID ${userId}:`, error);
         throw error;

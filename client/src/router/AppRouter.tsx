@@ -7,8 +7,8 @@ import RegisterPage from "../pages/auth/RegisterPage";
 import HomePage from "../pages/HomePage";
 import StudentPage from "../pages/student/StudentPage";
 import TeacherPage from "../pages/teacher/TeacherPage";
-import EditCoursePage from "../pages/teacher/CourseEditorPage";
-import EditLessonPage from "../pages/teacher/lesson/EditLessonPage";
+import CourseEditorPage from "../pages/teacher/CourseEditorPage";
+import LessonEditorPage from "../pages/teacher/lesson/LessonEditorPage";
 import AdminPage from "../pages/admin/AdminPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import { JSX } from "react";
@@ -58,7 +58,7 @@ export default function AppRouter() {
           path="/teacher/edit-course/new"
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
-              <EditCoursePage />
+              <CourseEditorPage />
             </ProtectedRoute>
           }
         />
@@ -66,7 +66,7 @@ export default function AppRouter() {
           path="/teacher/edit-course/:courseId"
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
-              <EditCoursePage />
+              <CourseEditorPage />
             </ProtectedRoute>
           }
         />
@@ -74,7 +74,7 @@ export default function AppRouter() {
           path="/teacher/edit-lesson/:lessonId"
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
-              <EditLessonPage />
+              <LessonEditorPage />
             </ProtectedRoute>
           }
         />

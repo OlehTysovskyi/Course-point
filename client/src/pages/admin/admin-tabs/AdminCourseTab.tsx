@@ -1,19 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getCourses } from '../../../services/courseService';
-
-export interface Course {
-    id: string;
-    title: string;
-    description: string;
-    teacher: {
-        id: string;
-        name: string;
-        email: string;
-    } | null;
-    published: boolean;
-    status: 'new' | 'update';
-    author: string; 
-}
+import { getCourses, Course } from '../../../services/courseService';
 
 export default function AdminCoursesTab({ searchTerm }: { searchTerm: string }) {
     const [courses, setCourses] = useState<Course[]>([]);
@@ -24,14 +10,7 @@ export default function AdminCoursesTab({ searchTerm }: { searchTerm: string }) 
         const fetchCourses = async () => {
             try {
                 const data = await getCourses();
-
-                const enriched = data.map((course: any) => ({
-                    ...course,
-                    status: course.published ? 'update' : 'new',
-                    author: course.teacher?.name || 'Невідомо'
-                }));
-
-                setCourses(enriched);
+                setCourses(data);
             } catch (err) {
                 setError('Не вдалося завантажити курси.');
                 console.error(err);
@@ -43,10 +22,12 @@ export default function AdminCoursesTab({ searchTerm }: { searchTerm: string }) 
         fetchCourses();
     }, []);
 
-    const filtered = courses.filter(course =>
-        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.author.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = searchTerm.trim()
+        ? courses.filter(course =>
+            course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (course.teacher?.name?.toLowerCase() || 'невідомо').includes(searchTerm.toLowerCase())
+        )
+        : courses;
 
     if (loading) return <p>Завантаження...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
@@ -55,11 +36,11 @@ export default function AdminCoursesTab({ searchTerm }: { searchTerm: string }) 
         <div className="space-y-4">
             {filtered.length === 0 && <p>Курсів не знайдено.</p>}
             {filtered.map((course) => (
-                <div key={course.id} className="border p-4 rounded flex justify-between items-center">
+                <div key={course._id} className="border p-4 rounded flex justify-between items-center">
                     <div>
                         <p><strong>{course.title}</strong></p>
-                        <p>Автор: {course.author}</p>
-                        <p>Тип: {course.status === 'new' ? 'Нова заявка' : 'Оновлення'}</p>
+                        <p>Автор: {course.teacher?.name || 'Невідомо'}</p>
+                        <p>Тип: {course.published ? 'Оновлення' : 'Нова заявка'}</p>
                     </div>
                     <div className="flex gap-2">
                         <button className="px-3 py-1 bg-green-500 text-white rounded">✅ Схвалити</button>

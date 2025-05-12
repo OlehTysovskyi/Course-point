@@ -58,17 +58,6 @@ export default function CourseEditorPage() {
     }
   };
 
-  const addLesson = () => {
-    setContent((prev) => [
-      ...prev,
-      {
-        id: uuidv4(),
-        type: "lesson",
-        data: { id: uuidv4(), title: "Новий урок" },
-      },
-    ]);
-  };
-
   const addModule = (graded: boolean) => {
     setContent((prev) => [
       ...prev,
@@ -108,7 +97,9 @@ export default function CourseEditorPage() {
 
       {/* Кнопки для додавання уроків та модулів */}
       <div className="flex gap-4 mb-6">
-        <button onClick={addLesson} className="bg-green-600 text-white px-4 py-2 rounded-md">
+        <button
+          onClick={() => navigate(`/teacher/edit-lesson/new`)}
+          className="bg-green-600 text-white px-4 py-2 rounded-md">
           ➕ Додати урок
         </button>
         <button
