@@ -23,16 +23,7 @@ exports.approveSignup = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user || !(await user.matchPassword(password))) {
-            return res.status(401).json({ message: 'Невірні облікові дані' });
-        }
-        const token = jwt.sign(
-            { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-        );
+        const token = await authService.login(req.body);
         res.json({ token });
     } catch (err) {
         next(err);
