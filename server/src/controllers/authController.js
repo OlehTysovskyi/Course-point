@@ -1,17 +1,12 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const RegistrationRequest = require('../models/RegistrationRequest');
-const EmailService = require('../utils/EmailService');
+const regReqService = require('../services/registrationRequestService');
+const UserService = require('../services/userService'); // якщо потрібні інші методи
 
 exports.requestSignup = async (req, res, next) => {
     try {
-        const { name, email, role, password } = req.body;
-        const existsReq = await RegistrationRequest.findOne({ email });
-        const existsUser = await User.findOne({ email });
-        if (existsReq || existsUser) {
-            return res.status(400).json({ message: 'Email вже використовується' });
-        }
-        const reqDoc = await RegistrationRequest.create({ name, email, role, password });
+        const dto = req.body; // { name, email, role, password? }
+        const reqDoc = await regReqService.submitRequest(dto);
         res.status(201).json(reqDoc);
     } catch (err) {
         next(err);
@@ -20,26 +15,12 @@ exports.requestSignup = async (req, res, next) => {
 
 exports.approveSignup = async (req, res, next) => {
     try {
-        const reqDoc = await RegistrationRequest.findById(req.params.id);
-        if (!reqDoc) {
-            return res.status(404).json({ message: 'Заявка не знайдена' });
-        }
-        // Створюємо користувача з тими ж даними (пароль вже захешовано)
-        const user = await User.create({
-            name: reqDoc.name,
-            email: reqDoc.email,
-            password: reqDoc.password,
-            role: reqDoc.role
-        });
-        reqDoc.status = 'approved';
-        await reqDoc.save();
-        EmailService.sendWelcome(user.email);
+        const user = await regReqService.approveRequest(req.params.id);
         res.json({ message: 'Акаунт створено', user });
     } catch (err) {
         next(err);
     }
 };
-
 exports.login = async (req, res, next) => {
     try {
         const { email, password } = req.body;

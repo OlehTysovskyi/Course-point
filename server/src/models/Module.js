@@ -1,10 +1,26 @@
 const mongoose = require('mongoose');
 
 const ModuleSchema = new mongoose.Schema({
-    title: String,
-    lessons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' }],
-    questions: [Object],
-    createdAt: { type: Date, default: Date.now }
+    title: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    lessons: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Lesson'
+    }],
+    graded: {
+        type: Boolean,
+        default: false
+    },
+    questions: [{
+        type: Object
+    }],
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 module.exports = mongoose.model('Module', ModuleSchema);
