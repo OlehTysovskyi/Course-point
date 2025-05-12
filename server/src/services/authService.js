@@ -27,7 +27,7 @@ class AuthService {
         }
 
         // 3. Підготувати payload та підписати JWT
-        const payload = { id: user._id, role: user.role };
+        const payload = { id: user._id, email: user. _email, role: user.role };
         const token = jwt.sign(
             payload,
             process.env.JWT_SECRET,
