@@ -7,7 +7,7 @@ import RegisterPage from "../pages/auth/RegisterPage";
 import HomePage from "../pages/HomePage";
 import StudentPage from "../pages/student/StudentPage";
 import TeacherPage from "../pages/teacher/TeacherPage";
-import EditCoursePage from "../pages/teacher/EditCoursePage";
+import EditCoursePage from "../pages/teacher/CourseEditorPage";
 import EditLessonPage from "../pages/teacher/lesson/EditLessonPage";
 import AdminPage from "../pages/admin/AdminPage";
 import NotFoundPage from "../pages/NotFoundPage";
@@ -51,6 +51,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
               <TeacherPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/edit-course/new"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <EditCoursePage />
             </ProtectedRoute>
           }
         />

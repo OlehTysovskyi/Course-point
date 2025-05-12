@@ -3,13 +3,11 @@ const CourseBuilder = require('../builders/CourseBuilder');
 
 class CourseService {
     async createCourse(dto, teacherId) {
-        // валідація title/description
         if (!dto.title || !dto.description) {
             const err = new Error('title та description — обовʼязкові');
             err.statusCode = 400;
             throw err;
         }
-        // builder
         const builder = new CourseBuilder()
             .setTitle(dto.title)
             .setDescription(dto.description)
@@ -38,18 +36,15 @@ class CourseService {
     }
 
     async updateCourse(id, dto, teacherId) {
-        // опціонально перевірити, що викладач збігається
         if (dto.title === '' || dto.description === '') {
             const err = new Error('title та description не можуть бути порожніми');
             err.statusCode = 400;
             throw err;
         }
 
-        // Якщо оновлюємо lessons/modules — можна перевірити типи
         const updateData = {
             ...dto
         };
-        // Забезпечити, що published булевий
         if ('published' in dto && typeof dto.published !== 'boolean') {
             const err = new Error('published має бути булевим');
             err.statusCode = 400;

@@ -18,7 +18,6 @@ class UserRepository {
     }
 
     async updateById(id, updateData) {
-        // Якщо є пароль — воно захешується в UserSchema.pre('save')
         return User.findByIdAndUpdate(id, updateData, {
             new: true,
             runValidators: true,

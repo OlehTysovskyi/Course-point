@@ -1,5 +1,3 @@
-// server/src/swagger.js
-
 const swaggerJSDoc = require('swagger-jsdoc');
 require('dotenv').config();
 
@@ -26,7 +24,6 @@ const options = {
                 }
             },
             schemas: {
-                // ------ RegistrationRequest ------
                 RegistrationRequest: {
                     type: 'object',
                     required: ['_id', 'name', 'email', 'role', 'status', 'createdAt'],
@@ -62,7 +59,6 @@ const options = {
                     }
                 },
 
-                // ------ UserInput & User ------
                 UserInput: {
                     type: 'object',
                     required: ['name', 'email', 'password', 'role'],
@@ -117,7 +113,6 @@ const options = {
                     }
                 },
 
-                // ------ CourseInput & Course ------
                 CourseInput: {
                     type: 'object',
                     required: ['title', 'description'],
@@ -193,7 +188,6 @@ const options = {
                     }
                 },
 
-                // ------ Lesson ------
                 Lesson: {
                     type: 'object',
                     required: ['_id', 'title', 'content'],
@@ -208,7 +202,6 @@ const options = {
                     }
                 },
 
-                // ------ Module ------
                 Module: {
                     type: 'object',
                     required: ['_id', 'title'],

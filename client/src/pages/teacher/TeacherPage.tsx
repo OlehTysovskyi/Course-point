@@ -1,19 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { getCourses, Course } from "../../services/courseService";
 
-type Course = {
-  _id: string;
-  title: string;
-  description: string;
-};
-
-export default function MyCoursesPage() {
+export default function TeacherPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get<Course[]>("http://localhost:5000/api/courses").then((res) => setCourses(res.data));
+    getCourses().then(setCourses).catch(console.error);
   }, []);
 
   return (
@@ -21,7 +15,7 @@ export default function MyCoursesPage() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Мої курси</h1>
         <button
-          onClick={() => navigate(`/teacher/edit-course/${null}`)}
+          onClick={() => navigate(`/teacher/edit-course/new`)}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
           ➕ Створити курс

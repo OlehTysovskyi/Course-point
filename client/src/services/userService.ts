@@ -6,8 +6,8 @@ if (!API_URL) {
     throw new Error('API_URL is not defined in the .env file');
 }
 
-interface User {
-    id: string;
+export interface User {
+    _id: string;
     name: string;
     email: string;
     role: 'student' | 'teacher' | 'admin';

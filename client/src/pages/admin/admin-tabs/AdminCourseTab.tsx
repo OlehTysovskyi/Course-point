@@ -1,20 +1,55 @@
-type Course = {
+import { useEffect, useState } from 'react';
+import { getCourses } from '../../../services/courseService';
+
+export interface Course {
     id: string;
     title: string;
-    author: string;
+    description: string;
+    teacher: {
+        id: string;
+        name: string;
+        email: string;
+    } | null;
+    published: boolean;
     status: 'new' | 'update';
-};
-
-const mockCourses: Course[] = [
-    { id: '1', title: 'Основи React', author: 'Іван Іваненко', status: 'new' },
-    { id: '2', title: 'Продвинутий JavaScript', author: 'Марія Петренко', status: 'update' },
-];
+    author: string; 
+}
 
 export default function AdminCoursesTab({ searchTerm }: { searchTerm: string }) {
-    const filtered = mockCourses.filter(course =>
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const data = await getCourses();
+
+                const enriched = data.map((course: any) => ({
+                    ...course,
+                    status: course.published ? 'update' : 'new',
+                    author: course.teacher?.name || 'Невідомо'
+                }));
+
+                setCourses(enriched);
+            } catch (err) {
+                setError('Не вдалося завантажити курси.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
+    const filtered = courses.filter(course =>
         course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.author.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    if (loading) return <p>Завантаження...</p>;
+    if (error) return <p className="text-red-500">{error}</p>;
 
     return (
         <div className="space-y-4">
