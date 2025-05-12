@@ -1,22 +1,47 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-export default function TeacherPage() {
+type Course = {
+  _id: string;
+  title: string;
+  description: string;
+};
+
+export default function MyCoursesPage() {
+  const [courses, setCourses] = useState<Course[]>([]);
   const navigate = useNavigate();
 
+  // useEffect(() => {
+  //   axios.get<Course[]>("/api/courses").then((res) => setCourses(res.data));
+  // }, []);
+
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4">
-      <h1 className="text-3xl font-bold mb-6">Кабінет викладача</h1>
+    <div className="max-w-4xl mx-auto py-8 px-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Мої курси</h1>
+        <button
+          onClick={() => navigate(`/teacher/edit-course/${123}`)}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          ➕ Створити курс
+        </button>
+      </div>
 
-      <p className="mb-4 text-gray-700">
-        Тут ви можете керувати своїми курсами, створювати нові та переглядати статистику.
-      </p>
-
-      <button
-        onClick={() => navigate("/teacher/create-course")}
-        className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-medium"
-      >
-        ➕ Створити новий курс
-      </button>
+      <div className="space-y-4">
+        {courses.map((course) => (
+          <div key={course._id} className="border p-4 rounded shadow">
+            <h2 className="text-xl font-semibold">{course.title}</h2>
+            <p className="text-gray-700">{course.description}</p>
+            <button
+              onClick={() => navigate(`/teacher/edit-course/${123}`)}
+              className="mt-2 text-sm text-blue-600 hover:underline"
+            >
+              ✏️ Редагувати
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
