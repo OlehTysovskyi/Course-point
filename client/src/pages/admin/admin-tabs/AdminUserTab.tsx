@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+import { getUsers } from '../../../services/userService';
+
 type User = {
     id: string;
     name: string;
@@ -5,21 +8,43 @@ type User = {
     role: 'student' | 'teacher' | 'admin';
 };
 
-const mockUsers: User[] = [
-    { id: '1', name: 'Олег Василенко', email: 'oleg@test.com', role: 'teacher' },
-    { id: '2', name: 'Наталя Бондаренко', email: 'natalia@test.com', role: 'student' },
-];
-
 export default function AdminUsersTab({ searchTerm }: { searchTerm: string }) {
-    const filtered = mockUsers.filter(user =>
+    const [users, setUsers] = useState<User[] | null>(null); // Створюємо стан для користувачів
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+    const fetchUsers = async () => {
+        try {
+            const fetchedUsers = await getUsers(); 
+            if (Array.isArray(fetchedUsers)) {
+                setUsers(fetchedUsers);
+            } else {
+                throw new Error('Отримані дані не є масивом');
+            }
+        } catch (err) {
+            setError('Помилка при завантаженні користувачів');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchUsers();
+}, []);
+
+
+    const filteredUsers = users ? users.filter(user =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ) : [];
 
     return (
         <div className="space-y-4">
-            {filtered.length === 0 && <p>Користувачів не знайдено.</p>}
-            {filtered.map((user) => (
+            {loading && <p>Завантаження...</p>}
+            {error && <p>{error}</p>}
+            {filteredUsers.length === 0 && !loading && <p>Користувачів не знайдено.</p>}
+            {filteredUsers.map((user) => (
                 <div key={user.id} className="border p-4 rounded flex justify-between items-center">
                     <div>
                         <p><strong>{user.name}</strong> ({user.email})</p>
