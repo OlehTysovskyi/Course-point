@@ -1,98 +1,65 @@
 const router = require('express').Router();
 const {
     requestSignup,
+    getAllRequests,
+    getRequestById,
     approveSignup,
     login
 } = require('../controllers/authController');
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
-/**
- * @swagger
- * tags:
- *   name: Auth
- *   description: Авторизація і реєстрація
- */
-
-/**
- * @swagger
- * /auth/request:
- *   post:
- *     summary: Надіслати запит на реєстрацію (включно з паролем)
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [name, email, role, password]
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *                 format: email
- *               role:
- *                 type: string
- *                 enum: [student, teacher]
- *               password:
- *                 type: string
- *     responses:
- *       201:
- *         description: Заявка створена
- */
 router.post('/request', requestSignup);
 
 /**
  * @swagger
- * /auth/request/{id}/approve:
- *   patch:
- *     summary: Адмін затверджує заявку та створює акаунт
+ * /auth/request:
+ *   get:
+ *     summary: Отримати всі заявки на реєстрацію
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Список заявок
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/RegistrationRequest'
+ */
+router.get('/request', protect, restrictTo('admin'), getAllRequests);
+
+/**
+ * @swagger
+ * /auth/request/{id}:
+ *   get:
+ *     summary: Отримати заявку за ID
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
- *         required: true
  *         schema:
  *           type: string
- *         description: ObjectId заявки
+ *         required: true
+ *         description: ID заявки
  *     responses:
  *       200:
- *         description: Акаунт створено, заявка затверджена
+ *         description: Дані заявки
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RegistrationRequest'
  *       404:
  *         description: Заявка не знайдена
  */
-router.patch(
-    '/request/:id/approve',
-    protect,
-    restrictTo('admin'),
-    approveSignup
-);
+router.get('/request/:id', protect, restrictTo('admin'), getRequestById);
 
-/**
- * @swagger
- * /auth/login:
- *   post:
- *     summary: Авторизація користувача
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [email, password]
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Повертає JWT-токен
- */
+// Погодження
+router.patch('/request/:id/approve', protect, restrictTo('admin'), approveSignup);
+
 router.post('/login', login);
 
 module.exports = router;

@@ -50,6 +50,20 @@ class RegistrationRequestService {
     EmailService.sendWelcome(user.email);
     return user;
   }
+
+  async getAllRequests() {
+    return reqRepo.findAll();
+  }
+
+  async getRequestById(id) {
+    const reqDoc = await reqRepo.findById(id);
+    if (!reqDoc) {
+      const err = new Error('Заявка не знайдена');
+      err.statusCode = 404;
+      throw err;
+    }
+    return reqDoc;
+  }
 }
 
 module.exports = new RegistrationRequestService();

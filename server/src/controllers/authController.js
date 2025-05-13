@@ -12,6 +12,26 @@ exports.requestSignup = async (req, res, next) => {
     }
 };
 
+/** @desc Отримати всі заявки (admin) */
+exports.getAllRequests = async (req, res, next) => {
+    try {
+        const list = await regReqService.getAllRequests();
+        res.json(list);
+    } catch (err) {
+        next(err);
+    }
+};
+
+/** @desc Отримати заявку за ID (admin) */
+exports.getRequestById = async (req, res, next) => {
+    try {
+        const reqDoc = await regReqService.getRequestById(req.params.id);
+        res.json(reqDoc);
+    } catch (err) {
+        next(err);
+    }
+};
+
 exports.approveSignup = async (req, res, next) => {
     try {
         const user = await regReqService.approveRequest(req.params.id);
@@ -29,3 +49,5 @@ exports.login = async (req, res, next) => {
         next(err);
     }
 };
+
+
