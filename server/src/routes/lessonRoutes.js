@@ -1,10 +1,10 @@
-// server/src/routes/lessonRoutes.js
-
 const router = require('express').Router();
 const {
     createLesson,
     getAllLessons,
-    getLessonById
+    getLessonById,
+    updateLesson,
+    deleteLesson
 } = require('../controllers/lessonController');
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
@@ -13,77 +13,6 @@ const { protect, restrictTo } = require('../middlewares/authMiddleware');
  * tags:
  *   name: Lessons
  *   description: Керування уроками
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     ContentBlock:
- *       type: object
- *       required:
- *         - id
- *         - type
- *       properties:
- *         id:
- *           type: string
- *           example: "550e8400-e29b-41d4-a716-446655440000"
- *         type:
- *           type: string
- *           enum: [heading, paragraph, list, quote, code, video, image, quiz]
- *         level:
- *           type: integer
- *           description: Рівень заголовка (для type=heading)
- *           example: 2
- *         text:
- *           type: string
- *           description: Текст для paragraph|heading|quote
- *         items:
- *           type: array
- *           items:
- *             type: string
- *           description: Пункти списку (для type=list)
- *         code:
- *           type: string
- *           description: Код (для type=code)
- *         url:
- *           type: string
- *           description: Посилання на відео (для type=video)
- *           format: uri
- *         images:
- *           type: array
- *           items:
- *             type: string
- *           description: URL зображень (для type=image)
- *         question:
- *           type: string
- *           description: Питання (для type=quiz)
- *         answers:
- *           type: array
- *           items:
- *             type: string
- *           description: Варіанти відповідей (для type=quiz)
- *         correctIndex:
- *           type: integer
- *           description: Індекс правильної відповіді (для type=quiz)
- *     Lesson:
- *       type: object
- *       required:
- *         - _id
- *         - title
- *         - blocks
- *       properties:
- *         _id:
- *           type: string
- *         title:
- *           type: string
- *         blocks:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/ContentBlock'
- *         createdAt:
- *           type: string
- *           format: date-time
  */
 
 /**
@@ -161,8 +90,71 @@ router.get('/:id', getLessonById);
  *             schema:
  *               $ref: '#/components/schemas/Lesson'
  *       401:
- *         description: Не авторизовано / недостатньо прав
+ *         description: Не авторизовано
  */
 router.post('/', protect, restrictTo('teacher'), createLesson);
+
+/**
+ * @swagger
+ * /lessons/{id}:
+ *   put:
+ *     summary: Оновити урок
+ *     tags: [Lessons]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               blocks:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/ContentBlock'
+ *     responses:
+ *       200:
+ *         description: Урок оновлено
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Lesson'
+ *       400:
+ *         description: Невірні дані
+ *       404:
+ *         description: Урок не знайдено
+ */
+router.put('/:id', protect, restrictTo('teacher'), updateLesson);
+
+/**
+ * @swagger
+ * /lessons/{id}:
+ *   delete:
+ *     summary: Видалити урок
+ *     tags: [Lessons]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Урок видалено
+ *       404:
+ *         description: Урок не знайдено
+ */
+router.delete('/:id', protect, restrictTo('teacher'), deleteLesson);
 
 module.exports = router;

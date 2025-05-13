@@ -188,17 +188,119 @@ const options = {
                     }
                 },
 
+                ContentBlock: {
+                    type: 'object',
+                    required: ['id', 'type'],
+                    properties: {
+                        id: {
+                            type: 'string',
+                            example: '550e8400-e29b-41d4-a716-446655440000'
+                        },
+                        type: {
+                            type: 'string',
+                            enum: ['heading', 'paragraph', 'list', 'quote', 'code', 'video', 'image', 'quiz'],
+                            example: 'paragraph'
+                        },
+                        level: {
+                            type: 'integer',
+                            description: 'Рівень заголовка (для type=heading)',
+                            example: 2
+                        },
+                        text: {
+                            type: 'string',
+                            description: 'Текст для paragraph|heading|quote',
+                            example: 'Це приклад абзацу.'
+                        },
+                        items: {
+                            type: 'array',
+                            description: 'Пункти списку (для type=list)',
+                            items: { type: 'string' },
+                            example: ['Пункт 1', 'Пункт 2']
+                        },
+                        code: {
+                            type: 'string',
+                            description: 'Код (для type=code)',
+                            example: "console.log('Hello');"
+                        },
+                        url: {
+                            type: 'string',
+                            description: 'Посилання на відео (для type=video)',
+                            example: 'https://youtu.be/xyz'
+                        },
+                        images: {
+                            type: 'array',
+                            description: 'URL зображень (для type=image)',
+                            items: { type: 'string' },
+                            example: ['https://.../img1.png']
+                        },
+                        question: {
+                            type: 'string',
+                            description: 'Питання (для type=quiz)',
+                            example: 'Що таке JavaScript?'
+                        },
+                        answers: {
+                            type: 'array',
+                            description: 'Варіанти відповідей (для type=quiz)',
+                            items: { type: 'string' },
+                            example: ['Мова програмування', 'Бібліотека', 'Фреймворк']
+                        },
+                        correctIndex: {
+                            type: 'integer',
+                            description: 'Індекс правильної відповіді (для type=quiz)',
+                            example: 0
+                        }
+                    }
+                },
+
+                LessonInput: {
+                    type: 'object',
+                    required: ['title', 'blocks'],
+                    properties: {
+                        title: {
+                            type: 'string',
+                            example: 'Вступ до JavaScript'
+                        },
+                        blocks: {
+                            type: 'array',
+                            items: { $ref: '#/components/schemas/ContentBlock' },
+                            example: [
+                                {
+                                    id: '550e8400-e29b-41d4-a716-446655440000',
+                                    type: 'heading',
+                                    level: 2,
+                                    text: 'Що таке JavaScript?'
+                                },
+                                {
+                                    id: '660e8400-e29b-41d4-a716-446655440001',
+                                    type: 'paragraph',
+                                    text: 'JavaScript — це мова програмування для вебу.'
+                                }
+                            ]
+                        }
+                    }
+                },
+
                 Lesson: {
                     type: 'object',
-                    required: ['_id', 'title', 'content'],
+                    required: ['_id', 'title', 'blocks', 'createdAt'],
                     properties: {
-                        _id: { type: 'string' },
-                        title: { type: 'string' },
-                        content: { type: 'string' },
-                        videoUrl: { type: 'string' },
-                        images: { type: 'array', items: { type: 'string' } },
-                        questions: { type: 'array', items: { type: 'object' } },
-                        createdAt: { type: 'string', format: 'date-time' }
+                        _id: {
+                            type: 'string',
+                            example: '60d5f012fc13ae3c28000009'
+                        },
+                        title: {
+                            type: 'string',
+                            example: 'Вступ до JavaScript'
+                        },
+                        blocks: {
+                            type: 'array',
+                            items: { $ref: '#/components/schemas/ContentBlock' }
+                        },
+                        createdAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            example: '2025-05-10T14:20:00.000Z'
+                        }
                     }
                 },
 

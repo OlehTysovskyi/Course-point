@@ -26,3 +26,21 @@ exports.getLessonById = async (req, res, next) => {
         next(err);
     }
 };
+
+exports.updateLesson = async (req, res, next) => {
+    try {
+        const updated = await lessonService.updateLesson(req.params.id, req.body);
+        res.json(updated);
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.deleteLesson = async (req, res, next) => {
+    try {
+        await lessonService.deleteLesson(req.params.id);
+        res.status(204).end();
+    } catch (err) {
+        next(err);
+    }
+};
