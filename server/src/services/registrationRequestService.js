@@ -2,6 +2,7 @@ const userRepository = require('../repositories/userRepository');
 const reqRepo = require('../repositories/registrationRequestRepository');
 const EmailService = require('../utils/EmailService');
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 class RegistrationRequestService {
   /**
@@ -10,15 +11,15 @@ class RegistrationRequestService {
    */
   async submitRequest(dto) {
     const { name, email, role, password } = dto;
-    // 1. Перевірка дублей
     if (await reqRepo.findPendingByEmail(email) || await userRepository.findByEmail(email)) {
       const err = new Error('Email вже використовується');
       err.statusCode = 400;
       throw err;
     }
-    // 2. Створення заявки
-    return reqRepo.create({ name, email, role, password });
+    const hashedPassword = await bcrypt.hash(password, 12);
+    return reqRepo.create({ name, email, role, password: hashedPassword });
   }
+
 
   /**
    * Адмін затверджує заявку та створює користувача

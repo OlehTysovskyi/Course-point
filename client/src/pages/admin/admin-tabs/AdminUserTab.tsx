@@ -59,7 +59,7 @@ export default function AdminUsersTab({ searchTerm }: { searchTerm: string }) {
                             onClick={() => handleDeleteUser(user._id)}
                             className="px-3 py-1 bg-red-500 text-white rounded"
                         >
-                            Деактивувати
+                            Видалити
                         </button>
                     </div>
                 </div>

@@ -1,4 +1,3 @@
-// server/src/models/Lesson.js
 const mongoose = require('mongoose');
 
 const ContentBlockSchema = new mongoose.Schema({
@@ -26,6 +25,11 @@ const ContentBlockSchema = new mongoose.Schema({
 const LessonSchema = new mongoose.Schema({
     title: { type: String, required: true, trim: true },
     blocks: { type: [ContentBlockSchema], default: [] },
+    courseId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        required: true
+    },
     createdAt: { type: Date, default: Date.now }
 });
 

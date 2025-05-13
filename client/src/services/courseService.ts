@@ -30,12 +30,31 @@ export interface CourseInput {
     published?: boolean;
 }
 
-export const getCourses = async (): Promise<Course[]> => {
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+        Authorization: `Bearer ${token}`,
+    };
+};
+
+export const getAllPublishedCourses = async (): Promise<Course[]> => {
     try {
         const response = await axios.get<Course[]>(`${API_URL}/courses`);
         return response.data;
     } catch (error) {
-        console.error('Error fetching courses:', error);
+        console.error('Error fetching published courses:', error);
+        throw error;
+    }
+};
+
+export const getAllCoursesAdmin = async (): Promise<Course[]> => {
+    try {
+        const response = await axios.get<Course[]>(`${API_URL}/courses/all`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching all admin courses:', error);
         throw error;
     }
 };
@@ -52,11 +71,8 @@ export const getCourseById = async (id: string): Promise<Course> => {
 
 export const createCourse = async (course: CourseInput): Promise<Course> => {
     try {
-        const token = localStorage.getItem('token');
         const response = await axios.post<Course>(`${API_URL}/courses`, course, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
         });
         return response.data;
     } catch (error) {
@@ -65,14 +81,15 @@ export const createCourse = async (course: CourseInput): Promise<Course> => {
     }
 };
 
-export const updateCourse = async (id: string, course: Partial<CourseInput>): Promise<Course> => {
+export const updateCourse = async (
+    id: string,
+    course: Partial<CourseInput>
+): Promise<Course> => {
     try {
-        const token = localStorage.getItem('token');
         const response = await axios.put<Course>(`${API_URL}/courses/${id}`, course, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
         });
+        console.log(getAuthHeaders());
         return response.data;
     } catch (error) {
         console.error(`Error updating course with ID ${id}:`, error);
@@ -82,14 +99,26 @@ export const updateCourse = async (id: string, course: Partial<CourseInput>): Pr
 
 export const deleteCourse = async (id: string): Promise<void> => {
     try {
-        const token = localStorage.getItem('token');
         await axios.delete(`${API_URL}/courses/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
         });
     } catch (error) {
         console.error(`Error deleting course with ID ${id}:`, error);
         throw error;
     }
+};
+
+export const getCoursesByTeacher = async (): Promise<Course[]> => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get<Course[]>(`${API_URL}/courses/all`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching teacher's courses:", error);
+    throw error;
+  }
 };

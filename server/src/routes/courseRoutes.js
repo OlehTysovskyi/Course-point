@@ -143,7 +143,7 @@ router.post('/', protect, restrictTo('teacher'), createCourse);
  *       404:
  *         description: Курс не знайдено
  */
-router.put('/:id', protect, restrictTo('teacher'), updateCourse);
+router.put('/:id', protect, restrictTo('teacher', 'admin'), updateCourse);
 
 /**
  * @swagger

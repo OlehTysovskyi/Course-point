@@ -9,6 +9,4 @@ const RequestSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-// ** Видаляємо повністю блок з bcrypt **
-
 module.exports = mongoose.model('RegistrationRequest', RequestSchema);

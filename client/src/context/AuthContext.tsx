@@ -1,11 +1,5 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import { jwtDecode } from "jwt-decode"; // Фікс імпорту
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { login, register, verifyToken } from "../services/authService"; // Імпортуємо сервіс
 
 interface User {
   id: string;
@@ -19,12 +13,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (
-    email: string,
-    password: string,
-    role: "student" | "teacher",
-    name: string
-  ) => Promise<void>;
+  register: (email: string, password: string, role: "student" | "teacher", name: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -39,33 +28,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const login = async (email: string, password: string) => {
+  const loginHandler = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Помилка логіну");
-
-      const decoded: any = jwtDecode(data.token);
+      const token = await login(email, password);
+      const decoded = verifyToken(token);
       setUser({
         id: decoded.id,
         email,
         role: decoded.role,
       });
 
-      // Зберігаємо токен для сесії (наприклад в localStorage)
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", token);
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (
+  const registerHandler = async (
     email: string,
     password: string,
     role: "student" | "teacher",
@@ -73,14 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role, name }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Помилка реєстрації");
+      await register(email, password, role, name);
     } finally {
       setLoading(false);
     }
@@ -91,12 +64,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
   };
 
-  // Перевірка сесії при завантаженні
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const decoded: any = jwtDecode(token);
+        const decoded = verifyToken(token); // Декодуємо токен
         setUser({
           id: decoded.id,
           email: decoded.email,
@@ -110,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, loading, login, logout, register }}
+      value={{ user, isAuthenticated: !!user, loading, login: loginHandler, logout, register: registerHandler }}
     >
       {children}
     </AuthContext.Provider>

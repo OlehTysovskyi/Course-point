@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCourses, Course } from "../../services/courseService";
+import { getCoursesByTeacher, Course } from "../../services/courseService";
 
 export default function TeacherPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    getCourses().then(setCourses).catch(console.error);
+    getCoursesByTeacher()
+      .then(setCourses)
+      .catch(console.error);
   }, []);
 
   return (
