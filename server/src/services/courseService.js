@@ -35,6 +35,16 @@ class CourseService {
         return course;
     }
 
+    /**
+       * Повернути всі курси певного викладача
+       * @param {string} teacherId
+       */
+    async getCoursesByTeacher(teacherId) {
+        // (опційно) перевірка, що викладач існує
+        const courses = await courseRepository.findByTeacher(teacherId);
+        return courses;
+    }
+
     async updateCourse(id, dto, teacherId) {
         if (dto.title === '' || dto.description === '') {
             const err = new Error('title та description не можуть бути порожніми');

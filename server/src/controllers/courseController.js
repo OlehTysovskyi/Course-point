@@ -27,6 +27,16 @@ exports.getCourseById = async (req, res, next) => {
     }
 };
 
+exports.getCoursesByTeacher = async (req, res, next) => {
+    try {
+        const teacherId = req.params.teacherId;
+        const courses = await courseService.getCoursesByTeacher(teacherId);
+        res.json(courses);
+    } catch (err) {
+        next(err);
+    }
+};
+
 exports.updateCourse = async (req, res, next) => {
     try {
         const updated = await courseService.updateCourse(

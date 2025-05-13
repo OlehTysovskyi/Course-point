@@ -3,6 +3,7 @@ const {
     createCourse,
     getAllCourses,
     getCourseById,
+    getCoursesByTeacher,
     updateCourse,
     deleteCourse
 } = require('../controllers/courseController');
@@ -55,7 +56,38 @@ router.get('/', getAllCourses);
  *       404:
  *         description: Курс не знайдено
  */
+
 router.get('/:id', getCourseById);
+
+/**
+ * @swagger
+ * /courses/teacher/{teacherId}:
+ *   get:
+ *     summary: Отримати всі курси певного викладача
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: teacherId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ObjectId викладача
+ *     responses:
+ *       200:
+ *         description: Список курсів
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Course'
+ */
+router.get(
+    '/teacher/:teacherId',
+    protect,
+    restrictTo('teacher', 'admin'),
+    getCoursesByTeacher
+);
 
 /**
  * @swagger
@@ -81,6 +113,7 @@ router.get('/:id', getCourseById);
  *       401:
  *         description: Не авторизовано
  */
+
 router.post('/', protect, restrictTo('teacher'), createCourse);
 
 /**

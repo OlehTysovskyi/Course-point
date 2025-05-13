@@ -19,6 +19,18 @@ class CourseRepository {
             .populate('modules');
     }
 
+    /**
+   * Знайти всі курси за teacherId
+   * @param {string} teacherId
+   * @returns {Promise<Array>}
+   */
+    async findByTeacher(teacherId) {
+        return Course.find({ teacher: teacherId })
+            .populate('teacher', 'name email')
+            .populate('lessons')
+            .populate('modules');
+    }
+
     async updateById(id, updateData) {
         return Course.findByIdAndUpdate(id, updateData, {
             new: true,
