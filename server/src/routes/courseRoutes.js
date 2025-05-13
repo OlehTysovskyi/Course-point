@@ -1,11 +1,13 @@
+// server/src/routes/courseRoutes.js
+
 const router = require('express').Router();
 const {
     createCourse,
-    getAllCourses,
+    getAllPublishedCourses,
     getCourseById,
-    getCoursesByTeacher,
     updateCourse,
-    deleteCourse
+    deleteCourse,
+    getAllCoursesAdmin
 } = require('../controllers/courseController');
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
@@ -15,6 +17,31 @@ const { protect, restrictTo } = require('../middlewares/authMiddleware');
  *   name: Courses
  *   description: Управління курсами
  */
+
+/**
+ * @swagger
+ * /courses/all:
+ *   get:
+ *     summary: Отримати всі курси (admin/teacher), без фільтрації published
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Список усіх курсів
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Course'
+ */
+router.get(
+    '/all',
+    protect,
+    restrictTo('admin', 'teacher'),
+    getAllCoursesAdmin
+);
 
 /**
  * @swagger
@@ -32,7 +59,7 @@ const { protect, restrictTo } = require('../middlewares/authMiddleware');
  *               items:
  *                 $ref: '#/components/schemas/Course'
  */
-router.get('/', getAllCourses);
+router.get('/', getAllPublishedCourses);
 
 /**
  * @swagger
@@ -46,6 +73,7 @@ router.get('/', getAllCourses);
  *         required: true
  *         schema:
  *           type: string
+ *         description: ID курсу
  *     responses:
  *       200:
  *         description: Дані курсу
@@ -56,38 +84,7 @@ router.get('/', getAllCourses);
  *       404:
  *         description: Курс не знайдено
  */
-
 router.get('/:id', getCourseById);
-
-/**
- * @swagger
- * /courses/teacher/{teacherId}:
- *   get:
- *     summary: Отримати всі курси певного викладача
- *     tags: [Courses]
- *     parameters:
- *       - in: path
- *         name: teacherId
- *         required: true
- *         schema:
- *           type: string
- *         description: ObjectId викладача
- *     responses:
- *       200:
- *         description: Список курсів
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Course'
- */
-router.get(
-    '/teacher/:teacherId',
-    protect,
-    restrictTo('teacher', 'admin'),
-    getCoursesByTeacher
-);
 
 /**
  * @swagger
@@ -113,7 +110,6 @@ router.get(
  *       401:
  *         description: Не авторизовано
  */
-
 router.post('/', protect, restrictTo('teacher'), createCourse);
 
 /**
@@ -142,8 +138,8 @@ router.post('/', protect, restrictTo('teacher'), createCourse);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Course'
- *       401:
- *         description: Не авторизовано
+ *       400:
+ *         description: Некоректні дані
  *       404:
  *         description: Курс не знайдено
  */
@@ -165,8 +161,6 @@ router.put('/:id', protect, restrictTo('teacher'), updateCourse);
  *     responses:
  *       204:
  *         description: Курс видалено
- *       401:
- *         description: Не авторизовано
  *       404:
  *         description: Курс не знайдено
  */

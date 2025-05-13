@@ -9,9 +9,9 @@ exports.createCourse = async (req, res, next) => {
     }
 };
 
-exports.getAllCourses = async (req, res, next) => {
+exports.getAllPublishedCourses = async (req, res, next) => {
     try {
-        const courses = await courseService.getAllCourses();
+        const courses = await courseService.getAllPublishedCourses();
         res.json(courses);
     } catch (err) {
         next(err);
@@ -31,6 +31,15 @@ exports.getCoursesByTeacher = async (req, res, next) => {
     try {
         const teacherId = req.params.teacherId;
         const courses = await courseService.getCoursesByTeacher(teacherId);
+        res.json(courses);
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.getAllCoursesAdmin = async (req, res, next) => {
+    try {
+        const courses = await courseService.getAllCoursesAdmin();
         res.json(courses);
     } catch (err) {
         next(err);

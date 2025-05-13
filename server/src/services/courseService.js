@@ -21,7 +21,7 @@ class CourseService {
         return courseRepository.create(courseData);
     }
 
-    async getAllCourses() {
+    async getAllPublishedCourses() {
         return courseRepository.findAllPublished();
     }
 
@@ -43,6 +43,10 @@ class CourseService {
         // (опційно) перевірка, що викладач існує
         const courses = await courseRepository.findByTeacher(teacherId);
         return courses;
+    }
+
+    async getAllCoursesAdmin() {
+        return courseRepository.findAll();
     }
 
     async updateCourse(id, dto, teacherId) {

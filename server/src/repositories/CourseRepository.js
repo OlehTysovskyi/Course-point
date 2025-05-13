@@ -19,6 +19,13 @@ class CourseRepository {
             .populate('modules');
     }
 
+    async findAll() {
+        return Course.find()
+            .populate('teacher', 'name email')
+            .populate('lessons')
+            .populate('modules');
+    }
+
     /**
    * Знайти всі курси за teacherId
    * @param {string} teacherId
