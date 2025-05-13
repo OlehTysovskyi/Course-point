@@ -2,7 +2,9 @@ const router = require('express').Router();
 const {
     createModule,
     getAllModules,
-    getModuleById
+    getModuleById,
+    updateModule,
+    deleteModule
 } = require('../controllers/moduleController');
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
@@ -10,35 +12,7 @@ const { protect, restrictTo } = require('../middlewares/authMiddleware');
  * @swagger
  * tags:
  *   name: Modules
- *   description: Керування модулями
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Module:
- *       type: object
- *       required: [ _id, title, graded, createdAt ]
- *       properties:
- *         _id:
- *           type: string
- *         title:
- *           type: string
- *         lessons:
- *           type: array
- *           items:
- *             type: string
- *         graded:
- *           type: boolean
- *           description: чи впливає на оцінку (true = оцінюваний)
- *         questions:
- *           type: array
- *           items:
- *             type: object
- *         createdAt:
- *           type: string
- *           format: date-time
+ *   description: Управління модулями
  */
 
 /**
@@ -68,10 +42,8 @@ router.get('/', getAllModules);
  *     parameters:
  *       - in: path
  *         name: id
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *         required: true
- *         description: ID модуля
  *     responses:
  *       200:
  *         description: Дані модуля
@@ -97,24 +69,7 @@ router.get('/:id', getModuleById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - title
- *               - graded
- *             properties:
- *               title:
- *                 type: string
- *               lessons:
- *                 type: array
- *                 items:
- *                   type: string
- *               graded:
- *                 type: boolean
- *                 example: false
- *               questions:
- *                 type: array
- *                 items:
- *                   type: object
+ *             $ref: '#/components/schemas/ModuleInput'
  *     responses:
  *       201:
  *         description: Модуль створено
@@ -123,8 +78,62 @@ router.get('/:id', getModuleById);
  *             schema:
  *               $ref: '#/components/schemas/Module'
  *       401:
- *         description: Не авторизовано / недостатньо прав
+ *         description: Не авторизовано
  */
 router.post('/', protect, restrictTo('teacher'), createModule);
+
+/**
+ * @swagger
+ * /modules/{id}:
+ *   put:
+ *     summary: Оновити модуль
+ *     tags: [Modules]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema: { type: string }
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ModuleInput'
+ *     responses:
+ *       200:
+ *         description: Модуль оновлено
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Module'
+ *       400:
+ *         description: Некоректні дані
+ *       404:
+ *         description: Модуль не знайдено
+ */
+router.put('/:id', protect, restrictTo('teacher'), updateModule);
+
+/**
+ * @swagger
+ * /modules/{id}:
+ *   delete:
+ *     summary: Видалити модуль
+ *     tags: [Modules]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema: { type: string }
+ *         required: true
+ *     responses:
+ *       204:
+ *         description: Модуль видалено
+ *       404:
+ *         description: Модуль не знайдено
+ */
+router.delete('/:id', protect, restrictTo('teacher'), deleteModule);
 
 module.exports = router;

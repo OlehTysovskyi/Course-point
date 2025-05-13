@@ -304,6 +304,17 @@ const options = {
                     }
                 },
 
+                ModuleInput: {
+                    type: 'object',
+                    required: ['title', 'graded'],
+                    properties: {
+                        title: { type: 'string', example: 'Модуль 1' },
+                        lessons: { type: 'array', items: { type: 'string' }, example: [] },
+                        graded: { type: 'boolean', example: false },
+                        questions: { type: 'array', items: { type: 'object' }, example: [] }
+                    }
+                },
+
                 Module: {
                     type: 'object',
                     required: ['_id', 'title'],
