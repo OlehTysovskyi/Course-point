@@ -75,6 +75,7 @@ router.get('/:id', getLessonById);
  *             required:
  *               - title
  *               - blocks
+ *               - courseId
  *             properties:
  *               title:
  *                 type: string
@@ -82,6 +83,9 @@ router.get('/:id', getLessonById);
  *                 type: array
  *                 items:
  *                   $ref: '#/components/schemas/ContentBlock'
+ *               courseId:
+ *                 type: string
+ *                 description: Ідентифікатор курсу, до якого належить урок
  *     responses:
  *       201:
  *         description: Урок створено
@@ -93,6 +97,7 @@ router.get('/:id', getLessonById);
  *         description: Не авторизовано
  */
 router.post('/', protect, restrictTo('teacher'), createLesson);
+
 
 /**
  * @swagger

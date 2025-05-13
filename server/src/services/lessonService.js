@@ -1,9 +1,18 @@
 const lessonRepository = require('../repositories/lessonRepository');
 const { v4: uuidv4 } = require('uuid');
 
+const mongoose = require('mongoose');
+
 class LessonService {
     async createLesson(dto) {
-        const { title, blocks } = dto;
+        const { title, blocks, courseId } = dto;
+
+        if (!mongoose.Types.ObjectId.isValid(courseId)) {
+            const err = new Error('Невірний формат courseId');
+            err.statusCode = 400;
+            throw err;
+        }
+
         if (!title || typeof title !== 'string') {
             const err = new Error('Поле title є обов’язковим і має бути рядком');
             err.statusCode = 400;
@@ -14,11 +23,13 @@ class LessonService {
             err.statusCode = 400;
             throw err;
         }
+
         const normalized = blocks.map(b => ({
             id: b.id || uuidv4(),
             ...b
         }));
-        return lessonRepository.create({ title, blocks: normalized });
+
+        return lessonRepository.create({ title, blocks: normalized, courseId });
     }
 
     async getAllLessons() {

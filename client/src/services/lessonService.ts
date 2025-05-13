@@ -24,12 +24,14 @@ export interface Lesson {
     _id: string;
     title: string;
     blocks: ContentBlock[];
+    courseId: string;
     createdAt: string;
 }
 
 export interface CreateLessonDto {
     title: string;
     blocks: ContentBlock[];
+    courseId: string;
 }
 
 const getAuthHeaders = () => {
@@ -65,6 +67,7 @@ export const getLessonById = async (id: string): Promise<Lesson> => {
 
 export const createLesson = async (lesson: CreateLessonDto): Promise<Lesson> => {
     try {
+        console.log("Creating lesson with courseId:", lesson.courseId);
         const response = await axios.post<Lesson>(`${API_URL}/lessons`, lesson, {
             headers: getAuthHeaders(),
         });

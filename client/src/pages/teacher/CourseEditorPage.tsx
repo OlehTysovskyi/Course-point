@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { createCourse, getCourseById, updateCourse } from "../../services/courseService";
+import { getAllLessons, Lesson } from "../../services/lessonService"; // 👈 підключаємо
 import { v4 as uuidv4 } from "uuid";
 
-type Lesson = {
+type LessonStub = {
   id: string;
   title: string;
 };
@@ -15,7 +16,7 @@ type Module = {
 };
 
 type CourseContentItem =
-  | { id: string; type: "lesson"; data: Lesson }
+  | { id: string; type: "lesson"; data: LessonStub }
   | { id: string; type: "module"; data: Module };
 
 export default function CourseEditorPage() {
@@ -25,6 +26,7 @@ export default function CourseEditorPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState<CourseContentItem[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -33,10 +35,20 @@ export default function CourseEditorPage() {
         .then(({ title, description }) => {
           setTitle(title);
           setDescription(description);
-          setContent(content || []);
+          // контент залишимо поки як є, бо він буде кастомним
         })
         .catch((err) => {
           console.error("Помилка завантаження курсу:", err);
+        });
+
+      // Завантаження уроків
+      getAllLessons()
+        .then((allLessons) => {
+          const courseLessons = allLessons.filter(l => l.courseId === courseId);
+          setLessons(courseLessons);
+        })
+        .catch((err) => {
+          console.error("Помилка завантаження уроків:", err);
         });
     }
   }, [courseId]);
@@ -95,10 +107,9 @@ export default function CourseEditorPage() {
         />
       </div>
 
-      {/* Кнопки для додавання уроків та модулів */}
       <div className="flex gap-4 mb-6">
         <button
-          onClick={() => navigate(`/teacher/edit-lesson/new`)}
+          onClick={() => navigate(`/teacher/edit-lesson/new/${courseId}`)}
           className="bg-green-600 text-white px-4 py-2 rounded-md">
           ➕ Додати урок
         </button>
@@ -116,16 +127,35 @@ export default function CourseEditorPage() {
         </button>
       </div>
 
-      {/* Повідомлення після збереження */}
       {message && <p className="text-green-500 mb-4">{message}</p>}
 
-      {/* Збереження курсу */}
       <button
         onClick={handleSave}
         className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 mb-6"
       >
         💾 Зберегти курс
       </button>
+
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-4">Уроки курсу:</h2>
+        {lessons.length > 0 ? (
+          <ul className="space-y-2">
+            {lessons.map((lesson) => (
+              <li key={lesson._id} className="flex justify-between items-center bg-gray-100 p-3 rounded-md">
+                <span>{lesson.title}</span>
+                <button
+                  onClick={() => navigate(`/teacher/edit-lesson/${lesson._id}`)}
+                  className="text-blue-600 hover:underline"
+                >
+                  ✏️ Редагувати
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Уроків поки немає.</p>
+        )}
+      </div>
     </div>
   );
 }

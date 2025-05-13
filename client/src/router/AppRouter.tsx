@@ -71,6 +71,14 @@ export default function AppRouter() {
           }
         />
         <Route
+          path="/teacher/edit-lesson/new/:courseId"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <LessonEditorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/teacher/edit-lesson/:lessonId"
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>

@@ -10,16 +10,15 @@ const ContentBlockSchema = new mongoose.Schema({
         enum: ['heading', 'paragraph', 'list', 'quote', 'code', 'video', 'image', 'quiz'],
         required: true
     },
-    // Поля для різних типів
-    level: { type: Number },        // для heading (1–6)
-    text: { type: String },        // для paragraph, heading, quote
-    items: [{ type: String }],      // для list
-    code: { type: String },        // для code блоків
-    url: { type: String },        // для video
-    images: [{ type: String }],      // для image
-    question: { type: String },        // для quiz
-    answers: [{ type: String }],      // для quiz
-    correctIndex: { type: Number }        // для quiz
+    level: { type: Number },
+    text: { type: String },
+    items: [{ type: String }],
+    code: { type: String },
+    url: { type: String },
+    images: [{ type: String }],
+    question: { type: String },
+    answers: [{ type: String }],
+    correctIndex: { type: Number }
 }, { _id: false });
 
 const LessonSchema = new mongoose.Schema({

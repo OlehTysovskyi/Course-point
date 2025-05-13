@@ -4,14 +4,17 @@ import { v4 as uuidv4 } from "uuid";
 import {
   createLesson,
   getLessonById,
-  // updateLesson,
+  updateLesson,
   ContentBlock,
 } from "../../../services/lessonService";
 
 const TextEditor = lazy(() => import("../../../components/layout/TextEditor"));
 
 export default function LessonEditorPage() {
-  const { lessonId } = useParams();
+  const params = useParams();
+  const lessonId = params.lessonId || null;
+  const courseId = params.courseId || null;
+
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -64,25 +67,36 @@ export default function LessonEditorPage() {
   };
 
   const handleSave = async () => {
-    const payload = { title, blocks };
+    if (!courseId) {
+      setMessage("Помилка: відсутній courseId.");
+      return;
+    }
+
+    const payload = { title, blocks, courseId};
+    console.log("Aaaaaaaaaaaaa"+payload.courseId)
+
     try {
-      if (lessonId && lessonId !== "new") {
-        await createLesson(payload);
+      if (lessonId) {
+        await updateLesson(lessonId, payload);
         setMessage("Урок оновлено! Тепер ви можете продовжити редагувати його.");
       } else {
         await createLesson(payload);
-        setMessage(`Урок створено! Тепер ви можете редагувати його.`);
-        // navigate(`/teacher/edit-course/${res._id}`);
+        setMessage("Урок створено! Тепер ви можете редагувати його.");
       }
     } catch (err) {
-      console.error("Помилка збереження курсу:", err);
+      console.error("Помилка збереження уроку:", err);
       setMessage("Сталася помилка при збереженні уроку.");
     }
   };
 
+
+
   return (
     <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{lessonId && lessonId !== "new" ? "Створити урок" : "Редагувати урок"}</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        {lessonId && lessonId !== "new" ? "Редагувати урок" : "Створити урок"}
+      </h1>
+
       <input
         className="w-full border p-2 mb-4"
         placeholder="Назва уроку"
@@ -109,7 +123,6 @@ export default function LessonEditorPage() {
             className={`border p-4 rounded ${activeId === blk.id ? "border-blue-500" : ""}`}
             onClick={() => setActiveId(blk.id)}
           >
-            {/* Рендер контенту */}
             {blk.type === "heading" && (
               activeId === blk.id
                 ? <input
@@ -127,7 +140,7 @@ export default function LessonEditorPage() {
                 ? <Suspense fallback={<div>Завантаження редактора...</div>}>
                   <TextEditor
                     content={blk.text || ""}
-                    onUpdate={(newContent: any) => updateBlock(idx, b => ({ ...b, text: newContent }))}
+                    onUpdate={(newContent: string) => updateBlock(idx, b => ({ ...b, text: newContent }))}
                   />
                 </Suspense>
                 : <p dangerouslySetInnerHTML={{ __html: blk.text || "" }} />
@@ -236,7 +249,6 @@ export default function LessonEditorPage() {
               </div>
             )}
 
-            {/* Кнопки керування */}
             <div className="flex gap-2 mt-2">
               <button onClick={() => move(idx, "up")} className="px-2 border">⬆️</button>
               <button onClick={() => move(idx, "down")} className="px-2 border">⬇️</button>
