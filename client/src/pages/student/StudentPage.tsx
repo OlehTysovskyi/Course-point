@@ -1,25 +1,28 @@
-import { useState } from "react";
-
-type Course = {
-  id: string;
-  title: string;
-  description: string;
-  teacher: string;
-};
+import { useState, useEffect } from "react";
+import { getAllPublishedCourses, Course } from "../../services/courseService";
 
 export default function StudentCoursesPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [myCourses, setMyCourses] = useState<Course[]>([
-    // Це приклад курсів, їх можна буде замінити на реальні дані з API
-    { id: "1", title: "Курс з React", description: "Основи React та JSX", teacher: "Викладач 1" },
-    { id: "2", title: "Курс з TypeScript", description: "Основи TypeScript", teacher: "Викладач 2" },
-  ]);
+  const [myCourses, setMyCourses] = useState<Course[]>([]);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [allCourses, setAllCourses] = useState<Course[]>([
-    // Це приклад всіх доступних курсів, їх можна буде замінити на реальні дані з API
-    { id: "3", title: "Курс з Node.js", description: "Основи Node.js для початківців", teacher: "Викладач 3" },
-    { id: "4", title: "Курс з MongoDB", description: "Базові знання про MongoDB", teacher: "Викладач 4" },
-  ]);
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoading(true);
+      try {
+        const courses = await getAllPublishedCourses();
+        setAllCourses(courses);
+      } catch (err) {
+        setError("Не вдалося завантажити курси. Спробуйте ще раз.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -33,7 +36,6 @@ export default function StudentCoursesPage() {
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Мої курси</h1>
 
-      {/* Пошук */}
       <div className="mb-4">
         <input
           type="text"
@@ -44,29 +46,34 @@ export default function StudentCoursesPage() {
         />
       </div>
 
-      {/* Мої курси */}
+      {loading && <p>Завантаження курсів...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
       <div>
         <h2 className="text-xl font-semibold mb-2">Мої курси</h2>
         <ul className="space-y-4">
-          {myCourses.map(course => (
-            <li key={course.id} className="border p-4 rounded shadow bg-white">
-              <h3 className="text-lg font-semibold">{course.title}</h3>
-              <p>{course.description}</p>
-              <p className="text-sm text-gray-500">Викладач: {course.teacher}</p>
-            </li>
-          ))}
+          {myCourses.length === 0 ? (
+            <p>У вас немає курсів.</p>
+          ) : (
+            myCourses.map(course => (
+              <li key={course._id} className="border p-4 rounded shadow bg-white">
+                <h3 className="text-lg font-semibold">{course.title}</h3>
+                <p>{course.description}</p>
+                <p className="text-sm text-gray-500">Викладач: {course.teacher.name}</p>
+              </li>
+            ))
+          )}
         </ul>
       </div>
 
-      {/* Всі курси (відфільтровані) */}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-2">Всі доступні курси</h2>
         <ul className="space-y-4">
           {filteredCourses.map(course => (
-            <li key={course.id} className="border p-4 rounded shadow bg-white">
+            <li key={course._id} className="border p-4 rounded shadow bg-white">
               <h3 className="text-lg font-semibold">{course.title}</h3>
               <p>{course.description}</p>
-              <p className="text-sm text-gray-500">Викладач: {course.teacher}</p>
+              <p className="text-sm text-gray-500">Викладач: {course.teacher.name}</p>
             </li>
           ))}
         </ul>

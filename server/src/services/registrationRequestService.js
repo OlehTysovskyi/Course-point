@@ -37,17 +37,14 @@ class RegistrationRequestService {
       err.statusCode = 400;
       throw err;
     }
-    // 3. Створюємо користувача (пароль вже хешовано в UserSchema)
     const user = await User.create({
       name: reqDoc.name,
       email: reqDoc.email,
       password: reqDoc.password,
       role: reqDoc.role
     });
-    // 4. Оновлюємо статус
     reqDoc.status = 'approved';
     await reqRepo.save(reqDoc);
-    // 5. Відправляємо лист
     EmailService.sendWelcome(user.email);
     return user;
   }

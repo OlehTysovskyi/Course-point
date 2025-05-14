@@ -37,17 +37,7 @@ const getAuthHeaders = () => {
     };
 };
 
-export const getAllPublishedCourses = async (): Promise<Course[]> => {
-    try {
-        const response = await axios.get<Course[]>(`${API_URL}/courses`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching published courses:', error);
-        throw error;
-    }
-};
-
-export const getAllCoursesAdmin = async (): Promise<Course[]> => {
+export const getAllCourses = async (): Promise<Course[]> => {
     try {
         const response = await axios.get<Course[]>(`${API_URL}/courses/all`, {
             headers: getAuthHeaders(),
@@ -58,6 +48,34 @@ export const getAllCoursesAdmin = async (): Promise<Course[]> => {
         throw error;
     }
 };
+
+export const getAllPublishedCourses = async (): Promise<Course[]> => {
+    try {
+        const response = await axios.get<Course[]>(`${API_URL}/courses`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching published courses:', error);
+        throw error;
+    }
+};
+
+//Треба зробити ше один роут по teacher id
+export const getAllCoursesByTeacher = async (): Promise<Course[]> => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get<Course[]>(`${API_URL}/courses/all`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching teacher's courses:", error);
+    throw error;
+  }
+};
+
+//Треба отримувати курси по прогресу шоб бачити тільки курси користувача разом з прогресом
 
 export const getCourseById = async (id: string): Promise<Course> => {
     try {
@@ -106,19 +124,4 @@ export const deleteCourse = async (id: string): Promise<void> => {
         console.error(`Error deleting course with ID ${id}:`, error);
         throw error;
     }
-};
-
-export const getCoursesByTeacher = async (): Promise<Course[]> => {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await axios.get<Course[]>(`${API_URL}/courses/all`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching teacher's courses:", error);
-    throw error;
-  }
 };

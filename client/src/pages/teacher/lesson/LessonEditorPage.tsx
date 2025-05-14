@@ -13,7 +13,7 @@ const TextEditor = lazy(() => import("../../../components/layout/TextEditor"));
 export default function LessonEditorPage() {
   const params = useParams();
   const lessonId = params.lessonId || null;
-  const courseId = params.courseId || null;
+  const [courseId, setCourseId] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -23,17 +23,22 @@ export default function LessonEditorPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (lessonId && lessonId !== "new") {
-      getLessonById(lessonId)
-        .then((lesson) => {
-          setTitle(lesson.title);
-          setBlocks(lesson.blocks);
-        })
-        .catch((err) => {
-          console.error("Помилка завантаження уроку:", err);
-        });
-    }
-  }, [lessonId]);
+  if (lessonId && lessonId !== "new") {
+    getLessonById(lessonId)
+      .then((lesson) => {
+        setTitle(lesson.title);
+        setBlocks(lesson.blocks);
+        setCourseId(lesson.courseId);
+      })
+      .catch((err) => {
+        console.error("Помилка завантаження уроку:", err);
+      });
+  } else {
+    const paramCourseId = params.courseId || null;
+    if (paramCourseId) setCourseId(paramCourseId);
+  }
+}, [lessonId]);
+
 
   const createBlock = (type: ContentBlock["type"]): ContentBlock => {
     const id = uuidv4();
@@ -88,8 +93,6 @@ export default function LessonEditorPage() {
       setMessage("Сталася помилка при збереженні уроку.");
     }
   };
-
-
 
   return (
     <div className="max-w-3xl mx-auto p-4">

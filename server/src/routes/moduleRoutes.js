@@ -80,7 +80,7 @@ router.get('/:id', getModuleById);
  *       401:
  *         description: Не авторизовано
  */
-router.post('/', protect, restrictTo('teacher'), createModule);
+router.post('/', protect, restrictTo('teacher', 'admin'), createModule);
 
 /**
  * @swagger
