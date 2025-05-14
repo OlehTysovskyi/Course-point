@@ -27,6 +27,15 @@ exports.getLessonById = async (req, res, next) => {
     }
 };
 
+exports.getLessonsByCourseId = async (req, res, next) => {
+    try {
+        const lessons = await lessonService.getLessonsByCourseId(req.params.courseId);
+        res.json(lessons);
+    } catch (err) {
+        next(err);
+    }
+};
+
 exports.updateLesson = async (req, res, next) => {
     try {
         const updated = await lessonService.updateLesson(req.params.id, req.body);

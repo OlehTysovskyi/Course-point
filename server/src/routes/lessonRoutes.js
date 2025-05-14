@@ -3,6 +3,7 @@ const {
     createLesson,
     getAllLessons,
     getLessonById,
+    getLessonsByCourseId,
     updateLesson,
     deleteLesson
 } = require('../controllers/lessonController');
@@ -57,6 +58,33 @@ router.get('/', getAllLessons);
  *         description: Урок не знайдено
  */
 router.get('/:id', getLessonById);
+
+/**
+ * @swagger
+ * /lessons/course/{courseId}:
+ *   get:
+ *     summary: Отримати всі уроки певного курсу
+ *     tags: [Lessons]
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ObjectId курсу
+ *     responses:
+ *       200:
+ *         description: Масив уроків
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Lesson'
+ *       404:
+ *         description: Курс не знайдено
+ */
+router.get('/course/:courseId', getLessonsByCourseId);
 
 /**
  * @swagger

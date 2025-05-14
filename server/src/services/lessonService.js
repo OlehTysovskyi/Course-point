@@ -46,6 +46,10 @@ class LessonService {
         return lesson;
     }
 
+    async getLessonsByCourseId(courseId) {
+        return lessonRepository.findByCourseId(courseId);
+    }
+
     async updateLesson(id, dto) {
         const { title, blocks } = dto;
         if (title !== undefined && typeof title !== 'string') {
