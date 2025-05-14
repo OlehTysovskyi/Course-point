@@ -1,4 +1,5 @@
 const Lesson = require('../models/Lesson');
+const Course = require('../models/Course');
 
 class LessonRepository {
     async create(data) {
