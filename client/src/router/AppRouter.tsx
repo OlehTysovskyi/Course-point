@@ -6,6 +6,7 @@ import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import HomePage from "../pages/HomePage";
 import StudentPage from "../pages/student/StudentPage";
+import CourseViewPage from "../pages/student/CourseViewPage";
 import TeacherPage from "../pages/teacher/TeacherPage";
 import CourseEditorPage from "../pages/teacher/CourseEditorPage";
 import LessonEditorPage from "../pages/teacher/lesson/LessonEditorPage";
@@ -43,6 +44,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["student"]}>
               <StudentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/view-course"
+          element={
+            <ProtectedRoute allowedRoles={["student"]}>
+              <CourseViewPage />
             </ProtectedRoute>
           }
         />

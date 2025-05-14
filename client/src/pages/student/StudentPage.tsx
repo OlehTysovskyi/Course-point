@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAllPublishedCourses, Course } from "../../services/courseService";
+import { getLessonsByCourseId } from "../../services/lessonService"; // Підключаємо метод
 
 export default function StudentCoursesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -7,6 +8,7 @@ export default function StudentCoursesPage() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [lessonsByCourse, setLessonsByCourse] = useState<{ [key: string]: Lesson[] }>({}); // Стан для зберігання уроків
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -14,6 +16,15 @@ export default function StudentCoursesPage() {
       try {
         const courses = await getAllPublishedCourses();
         setAllCourses(courses);
+        
+        // Завантажуємо уроки для кожного курсу
+        for (const course of courses) {
+          const lessons = await getLessonsByCourseId(course._id);
+          setLessonsByCourse((prevLessons) => ({
+            ...prevLessons,
+            [course._id]: lessons, // Зберігаємо уроки для кожного курсу
+          }));
+        }
       } catch (err) {
         setError("Не вдалося завантажити курси. Спробуйте ще раз.");
       } finally {
@@ -60,6 +71,17 @@ export default function StudentCoursesPage() {
                 <h3 className="text-lg font-semibold">{course.title}</h3>
                 <p>{course.description}</p>
                 <p className="text-sm text-gray-500">Викладач: {course.teacher.name}</p>
+                <ul className="mt-2">
+                  {lessonsByCourse[course._id] && lessonsByCourse[course._id].length > 0 ? (
+                    lessonsByCourse[course._id].map((lesson) => (
+                      <li key={lesson._id} className="text-sm text-gray-600">
+                        {lesson.title}
+                      </li>
+                    ))
+                  ) : (
+                    <p>Уроків немає.</p>
+                  )}
+                </ul>
               </li>
             ))
           )}
@@ -74,6 +96,17 @@ export default function StudentCoursesPage() {
               <h3 className="text-lg font-semibold">{course.title}</h3>
               <p>{course.description}</p>
               <p className="text-sm text-gray-500">Викладач: {course.teacher.name}</p>
+              <ul className="mt-2">
+                {lessonsByCourse[course._id] && lessonsByCourse[course._id].length > 0 ? (
+                  lessonsByCourse[course._id].map((lesson) => (
+                    <li key={lesson._id} className="text-sm text-gray-600">
+                      {lesson.title}
+                    </li>
+                  ))
+                ) : (
+                  <p>Уроків немає.</p>
+                )}
+              </ul>
             </li>
           ))}
         </ul>
