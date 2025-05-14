@@ -6,6 +6,11 @@ const ModuleSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        required: true
+    },
     lessons: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Lesson'

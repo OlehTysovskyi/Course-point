@@ -304,28 +304,31 @@ const options = {
                     }
                 },
 
+                Module: {
+                    type: 'object',
+                    required: ['_id', 'title', 'course', 'graded', 'createdAt'],
+                    properties: {
+                        _id: { type: 'string' },
+                        title: { type: 'string' },
+                        course: { type: 'string', description: 'ID курсу' },
+                        lessons: { type: 'array', items: { type: 'string' } },
+                        graded: { type: 'boolean' },
+                        questions: { type: 'array', items: { type: 'object' } },
+                        createdAt: { type: 'string', format: 'date-time' }
+                    }
+                },
                 ModuleInput: {
                     type: 'object',
-                    required: ['title', 'graded'],
+                    required: ['title', 'course', 'graded'],
                     properties: {
-                        title: { type: 'string', example: 'Модуль 1' },
+                        title: { type: 'string' },
+                        course: { type: 'string', description: 'ObjectId курсу' },
                         lessons: { type: 'array', items: { type: 'string' }, example: [] },
                         graded: { type: 'boolean', example: false },
                         questions: { type: 'array', items: { type: 'object' }, example: [] }
                     }
-                },
-
-                Module: {
-                    type: 'object',
-                    required: ['_id', 'title'],
-                    properties: {
-                        _id: { type: 'string' },
-                        title: { type: 'string' },
-                        lessons: { type: 'array', items: { type: 'string' } },
-                        questions: { type: 'array', items: { type: 'object' } },
-                        createdAt: { type: 'string', format: 'date-time' }
-                    }
                 }
+
             }
         },
         security: [

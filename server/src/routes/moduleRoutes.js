@@ -3,6 +3,7 @@ const {
     createModule,
     getAllModules,
     getModuleById,
+    getModulesByCourseId,
     updateModule,
     deleteModule
 } = require('../controllers/moduleController');
@@ -55,6 +56,31 @@ router.get('/', getAllModules);
  *         description: Модуль не знайдено
  */
 router.get('/:id', getModuleById);
+
+/**
+ * @swagger
+ * /modules/course/{courseId}:
+ *   get:
+ *     summary: Отримати всі модулі певного курсу
+ *     tags: [Modules]
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ObjectId курсу
+ *     responses:
+ *       200:
+ *         description: Масив модулів
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Module'
+ */
+router.get('/course/:courseId', getModulesByCourseId);
 
 /**
  * @swagger

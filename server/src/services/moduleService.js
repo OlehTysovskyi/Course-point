@@ -2,7 +2,21 @@ const moduleRepo = require('../repositories/moduleRepository');
 
 class ModuleService {
     async createModule(dto) {
-        const { title, lessons = [], graded = false, questions = [] } = dto;
+        const { title, course, lessons = [], graded = false, questions = [] } = dto;
+        if (!course) {
+            const err = new Error('Поле course (ID курсу) є обов’язковим');
+            err.statusCode = 400; throw err;
+        }
+
+        if (!title || typeof title !== 'string') {
+            const err = new Error('Поле title є обов’язковим');
+            err.statusCode = 400; throw err;
+        }
+        if (typeof graded !== 'boolean') {
+            const err = new Error('Поле graded має бути булевим');
+            err.statusCode = 400; throw err;
+        }
+
         if (!title || typeof title !== 'string') {
             const err = new Error('title є обов’язковим і має бути рядком');
             err.statusCode = 400; throw err;
@@ -11,7 +25,7 @@ class ModuleService {
             const err = new Error('Невірні типи полів lessons/graded/questions');
             err.statusCode = 400; throw err;
         }
-        return moduleRepo.create({ title, lessons, graded, questions });
+        return moduleRepo.create({ title, course, lessons, graded, questions });
     }
 
     async getAllModules() {
@@ -25,6 +39,10 @@ class ModuleService {
             err.statusCode = 404; throw err;
         }
         return mod;
+    }
+
+    async getModulesByCourseId(courseId) {
+        return moduleRepo.findByCourseId(courseId);
     }
 
     async updateModule(id, dto) {

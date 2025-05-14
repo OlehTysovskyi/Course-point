@@ -13,6 +13,10 @@ class ModuleRepository {
         return Module.findById(id);
     }
 
+    async findByCourseId(courseId) {
+        return Module.find({ course: courseId });
+    }
+
     async updateById(id, updateData) {
         return Module.findByIdAndUpdate(id, updateData, {
             new: true,

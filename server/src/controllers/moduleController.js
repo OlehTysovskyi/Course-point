@@ -27,6 +27,15 @@ exports.getModuleById = async (req, res, next) => {
     }
 };
 
+exports.getModulesByCourseId = async (req, res, next) => {
+    try {
+        const modules = await moduleService.getModulesByCourseId(req.params.courseId);
+        res.json(modules);
+    } catch (err) {
+        next(err);
+    }
+};
+
 exports.updateModule = async (req, res, next) => {
     try {
         const updated = await moduleService.updateModule(req.params.id, req.body);
