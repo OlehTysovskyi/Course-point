@@ -35,13 +35,11 @@ export default function CourseEditorPage() {
         .then(({ title, description }) => {
           setTitle(title);
           setDescription(description);
-          // контент залишимо поки як є, бо він буде кастомним
         })
         .catch((err) => {
           console.error("Помилка завантаження курсу:", err);
         });
 
-      // Завантаження уроків
       getAllLessons()
         .then((allLessons) => {
           const courseLessons = allLessons.filter(l => l.courseId === courseId);

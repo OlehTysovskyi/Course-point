@@ -1,5 +1,3 @@
-// server/src/services/authService.js
-
 const jwt = require('jsonwebtoken');
 const userRepository = require('../repositories/userRepository');
 
@@ -10,7 +8,6 @@ class AuthService {
      * @returns {Promise<string>} — токен
      */
     async login({ email, password }) {
-        // 1. Знайти користувача
         const user = await userRepository.findByEmail(email);
         if (!user) {
             const err = new Error('Невірні облікові дані');
@@ -18,7 +15,6 @@ class AuthService {
             throw err;
         }
 
-        // 2. Перевірити пароль
         const isMatch = await user.matchPassword(password);
         if (!isMatch) {
             const err = new Error('Невірні облікові дані');
@@ -26,7 +22,6 @@ class AuthService {
             throw err;
         }
 
-        // 3. Підготувати payload та підписати JWT
         const payload = { id: user._id, email: user. _email, role: user.role };
         const token = jwt.sign(
             payload,

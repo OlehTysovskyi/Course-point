@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-    getAllCoursesAdmin,
+    getAllCourses,
     updateCourse,
     Course
 } from '../../../services/courseService';
@@ -18,7 +18,7 @@ export default function AdminCoursesTab({ searchTerm }: { searchTerm: string }) 
 
     const fetchCourses = async () => {
         try {
-            const data = await getAllCoursesAdmin();
+            const data = await getAllCourses();
             setCourses(data);
         } catch (err) {
             setError('Не вдалося завантажити курси.');
