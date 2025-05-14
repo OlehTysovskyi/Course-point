@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllCoursesByTeacher, Course } from "../../services/courseService";
+import { useAuth } from "../../context/AuthContext";
 
 export default function TeacherPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
-    getAllCoursesByTeacher()
-      .then(setCourses)
-      .catch(console.error);
-  }, []);
+    if (user?.id) {
+      getAllCoursesByTeacher(user.id)
+        .then(setCourses)
+        .catch(console.error);
+    }
+  }, [user?.id]);
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">

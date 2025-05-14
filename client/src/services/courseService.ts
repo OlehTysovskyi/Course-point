@@ -59,11 +59,10 @@ export const getAllPublishedCourses = async (): Promise<Course[]> => {
     }
 };
 
-//Треба зробити ше один роут по teacher id
-export const getAllCoursesByTeacher = async (): Promise<Course[]> => {
+export const getAllCoursesByTeacher = async (id: string): Promise<Course[]> => {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.get<Course[]>(`${API_URL}/courses/all`, {
+    const response = await axios.get<Course[]>(`${API_URL}/courses/teacher/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
