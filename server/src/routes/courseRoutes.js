@@ -1,10 +1,9 @@
-// server/src/routes/courseRoutes.js
-
 const router = require('express').Router();
 const {
     createCourse,
     getAllPublishedCourses,
     getCourseById,
+    getCoursesByTeacher,
     updateCourse,
     deleteCourse,
     getAllCoursesAdmin
@@ -85,6 +84,36 @@ router.get('/', getAllPublishedCourses);
  *         description: Курс не знайдено
  */
 router.get('/:id', getCourseById);
+
+/**
+ * @swagger
+ * /courses/teacher/{teacherId}:
+ *   get:
+ *     summary: Отримати всі курси певного викладача
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: teacherId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ObjectId викладача
+ *     responses:
+ *       200:
+ *         description: Список курсів
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Course'
+ */
+router.get(
+    '/teacher/:teacherId',
+    protect,
+    restrictTo('teacher', 'admin'),
+    getCoursesByTeacher
+);
 
 /**
  * @swagger
