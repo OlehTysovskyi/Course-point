@@ -29,26 +29,44 @@ class ProgressService {
      * Оновити прогрес (додавання уроку, модуля та оновлення grade)
      * @param {{ userId, courseId, lessonId?, moduleId?, deltaGrade? }}
      */
-    async updateProgress({ userId, courseId, lessonId, moduleId, deltaGrade = 0 }) {
+
+    async updateProgress({ userId, courseId, moduleId, answersMap }) {
+
+        const module = await require('../models/Module').findById(moduleId);
+        if (!module) throw Object.assign(new Error('Модуль не знайдено'), { statusCode: 404 });
+
+        const G = module.grade || 0;
+        const Q = module.questions.length;
+        const W = Q > 0 ? G / Q : 0;
+
+        let totalDelta = 0;
+
+        module.questions.forEach((q, idx) => {
+            const selected = answersMap[idx] || [];
+            const A = q.answers.length;
+            const C = q.correctAnswers.length;
+            const SC = selected.filter(i => q.correctAnswers.includes(i)).length;
+            const SW = selected.length - SC;
+
+            const rawScore = C > 0 ? W * (SC / C) : 0;
+            const penalty = (A - C) > 0 ? W * (SW / (A - C)) : 0;
+            const score_i = Math.max(0, rawScore - penalty);
+
+            totalDelta += score_i;
+        });
+
         let p = await progressRepo.findByUserAndCourse(userId, courseId);
-        if (!p) {
-            // якщо ще не зараховано – створюємо
-            p = await progressRepo.create({ user: userId, course: courseId });
-        }
-        // додати урок
-        if (lessonId && !p.completedLessons.includes(lessonId)) {
-            p.completedLessons.push(lessonId);
-        }
-        // додати модуль
-        if (moduleId && !p.passedModules.includes(moduleId)) {
+        if (!p) p = await progressRepo.create({ user: userId, course: courseId });
+
+        if (!p.passedModules.includes(moduleId)) {
             p.passedModules.push(moduleId);
         }
-        // оновити бали
-        if (typeof deltaGrade === 'number' && deltaGrade !== 0) {
-            p.grade += deltaGrade;
-        }
+
+        p.grade = (p.grade || 0) + totalDelta;
+
         return progressRepo.update(p);
     }
+
 
     /**
      * Видалити прогрес (наприклад при виході з курсу)
