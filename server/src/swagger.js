@@ -393,6 +393,19 @@ const options = {
                         createdAt: { type: 'string', format: 'date-time' }
                     }
                 },
+                Progress: {
+                    type: 'object',
+                    required: ['user', 'course', 'grade', 'createdAt'],
+                    properties: {
+                        _id: { type: 'string' },
+                        user: { type: 'string' },
+                        course: { type: 'string' },
+                        completedLessons: { type: 'array', items: { type: 'string' } },
+                        passedModules: { type: 'array', items: { type: 'string' } },
+                        grade: { type: 'number' },
+                        createdAt: { type: 'string', format: 'date-time' }
+                    }
+                }
 
             }
         },
