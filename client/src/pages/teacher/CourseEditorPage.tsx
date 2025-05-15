@@ -1,23 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { createCourse, getCourseById, updateCourse } from "../../services/courseService";
-import { getAllLessons, Lesson } from "../../services/lessonService"; // 👈 підключаємо
-import { v4 as uuidv4 } from "uuid";
-
-type LessonStub = {
-  id: string;
-  title: string;
-};
-
-type Module = {
-  id: string;
-  title: string;
-  graded: boolean;
-};
-
-type CourseContentItem =
-  | { id: string; type: "lesson"; data: LessonStub }
-  | { id: string; type: "module"; data: Module };
+import { getAllLessons, Lesson } from "../../services/lessonService";
+import { getModulesByCourseId, Module } from "../../services/moduleService"; // 👈 новий імпорт
 
 export default function CourseEditorPage() {
   const { courseId } = useParams();
@@ -25,8 +10,8 @@ export default function CourseEditorPage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [content, setContent] = useState<CourseContentItem[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [modules, setModules] = useState<Module[]>([]); // 👈 новий стейт
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -48,11 +33,17 @@ export default function CourseEditorPage() {
         .catch((err) => {
           console.error("Помилка завантаження уроків:", err);
         });
+
+      getModulesByCourseId(courseId)
+        .then(setModules)
+        .catch((err) => {
+          console.error("Помилка завантаження модулів:", err);
+        });
     }
   }, [courseId]);
 
   const handleSave = async () => {
-    const courseData = { title, description, content };
+    const courseData = { title, description };
     try {
       if (courseId && courseId !== "new") {
         await updateCourse(courseId, courseData);
@@ -68,19 +59,8 @@ export default function CourseEditorPage() {
     }
   };
 
-  const addModule = (graded: boolean) => {
-    setContent((prev) => [
-      ...prev,
-      {
-        id: uuidv4(),
-        type: "module",
-        data: {
-          id: uuidv4(),
-          title: graded ? "Оцінювальний модуль" : "Неоцінювальний модуль",
-          graded,
-        },
-      },
-    ]);
+  const handleCreateModule = (graded: boolean) => {
+    navigate(`/teacher/create-module/new/${courseId}?graded=${graded}`);
   };
 
   return (
@@ -107,18 +87,19 @@ export default function CourseEditorPage() {
 
       <div className="flex gap-4 mb-6">
         <button
-          onClick={() => navigate(`/teacher/edit-lesson/new/${courseId}`)}
-          className="bg-green-600 text-white px-4 py-2 rounded-md">
+          onClick={() => navigate(`/teacher/create-lesson/new/${courseId}`)}
+          className="bg-green-600 text-white px-4 py-2 rounded-md"
+        >
           ➕ Додати урок
         </button>
         <button
-          onClick={() => addModule(false)}
+          onClick={() => handleCreateModule(false)}
           className="bg-yellow-500 text-white px-4 py-2 rounded-md"
         >
           ➕ Неоцінювальний модуль
         </button>
         <button
-          onClick={() => addModule(true)}
+          onClick={() => handleCreateModule(true)}
           className="bg-red-600 text-white px-4 py-2 rounded-md"
         >
           ➕ Оцінювальний модуль
@@ -152,6 +133,27 @@ export default function CourseEditorPage() {
           </ul>
         ) : (
           <p>Уроків поки немає.</p>
+        )}
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold mb-4">Модулі курсу:</h2>
+        {modules.length > 0 ? (
+          <ul className="space-y-2">
+            {modules.map((mod) => (
+              <li key={mod._id} className="flex justify-between items-center bg-gray-100 p-3 rounded-md">
+                <span>{mod.title} {mod.graded ? "(оцінювальний)" : "(неоцінювальний)"}</span>
+                <button
+                  onClick={() => navigate(`/teacher/edit-module/${mod._id}`)}
+                  className="text-blue-600 hover:underline"
+                >
+                  ✏️ Редагувати
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Модулів поки немає.</p>
         )}
       </div>
     </div>

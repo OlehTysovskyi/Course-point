@@ -10,6 +10,7 @@ import CourseViewPage from "../pages/student/CourseViewPage";
 import TeacherPage from "../pages/teacher/TeacherPage";
 import CourseEditorPage from "../pages/teacher/CourseEditorPage";
 import LessonEditorPage from "../pages/teacher/lesson/LessonEditorPage";
+import ModuleEditorPage from "../pages/teacher/module/ModuleEditorPage";
 import AdminPage from "../pages/admin/AdminPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import { JSX } from "react";
@@ -64,7 +65,7 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/teacher/edit-course/new"
+          path="/teacher/create-course/new"
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
               <CourseEditorPage />
@@ -80,7 +81,7 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/teacher/edit-lesson/new/:courseId"
+          path="/teacher/create-lesson/new/:courseId"
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
               <LessonEditorPage />
@@ -92,6 +93,22 @@ export default function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
               <LessonEditorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/create-module/new/:courseId"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <ModuleEditorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/edit-module/:moduleId"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <ModuleEditorPage />
             </ProtectedRoute>
           }
         />
