@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAllPublishedCourses, Course } from "../../services/courseService";
-import { getLessonsByCourseId } from "../../services/lessonService"; // Підключаємо метод
 
 export default function StudentCoursesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -8,7 +8,7 @@ export default function StudentCoursesPage() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [lessonsByCourse, setLessonsByCourse] = useState<{ [key: string]: Lesson[] }>({}); // Стан для зберігання уроків
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -16,15 +16,8 @@ export default function StudentCoursesPage() {
       try {
         const courses = await getAllPublishedCourses();
         setAllCourses(courses);
-        
-        // Завантажуємо уроки для кожного курсу
-        for (const course of courses) {
-          const lessons = await getLessonsByCourseId(course._id);
-          setLessonsByCourse((prevLessons) => ({
-            ...prevLessons,
-            [course._id]: lessons, // Зберігаємо уроки для кожного курсу
-          }));
-        }
+        // Тут можна фільтрувати курси, які належать поточному студенту
+        setMyCourses([]); // Тимчасово порожній масив
       } catch (err) {
         setError("Не вдалося завантажити курси. Спробуйте ще раз.");
       } finally {
@@ -71,17 +64,12 @@ export default function StudentCoursesPage() {
                 <h3 className="text-lg font-semibold">{course.title}</h3>
                 <p>{course.description}</p>
                 <p className="text-sm text-gray-500">Викладач: {course.teacher.name}</p>
-                <ul className="mt-2">
-                  {lessonsByCourse[course._id] && lessonsByCourse[course._id].length > 0 ? (
-                    lessonsByCourse[course._id].map((lesson) => (
-                      <li key={lesson._id} className="text-sm text-gray-600">
-                        {lesson.title}
-                      </li>
-                    ))
-                  ) : (
-                    <p>Уроків немає.</p>
-                  )}
-                </ul>
+                <button
+                  onClick={() => navigate(`/courses/${course._id}`)}
+                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Переглянути
+                </button>
               </li>
             ))
           )}
@@ -96,17 +84,12 @@ export default function StudentCoursesPage() {
               <h3 className="text-lg font-semibold">{course.title}</h3>
               <p>{course.description}</p>
               <p className="text-sm text-gray-500">Викладач: {course.teacher.name}</p>
-              <ul className="mt-2">
-                {lessonsByCourse[course._id] && lessonsByCourse[course._id].length > 0 ? (
-                  lessonsByCourse[course._id].map((lesson) => (
-                    <li key={lesson._id} className="text-sm text-gray-600">
-                      {lesson.title}
-                    </li>
-                  ))
-                ) : (
-                  <p>Уроків немає.</p>
-                )}
-              </ul>
+              <button
+                onClick={() => navigate(`/view-course/${course._id}`)}
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Переглянути
+              </button>
             </li>
           ))}
         </ul>

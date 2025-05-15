@@ -52,7 +52,7 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/student/view-course"
+          path="/view-course/:courseId"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
               <CourseViewPage />
