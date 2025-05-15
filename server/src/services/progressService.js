@@ -12,6 +12,13 @@ class ProgressService {
         return progressRepo.create({ user: userId, course: courseId });
     }
 
+    async getCoursesByUser(userId) {
+        // 1) отримуємо Progress[] з populated.course
+        const progresses = await progressRepo.findByUser(userId);
+        // 2) повертаємо масив тільки полів course
+        return progresses.map(p => p.course);
+    }
+
     /**
      * Отримати прогрес користувача по курсу
      */

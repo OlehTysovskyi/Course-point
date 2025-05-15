@@ -10,6 +10,15 @@ exports.enroll = async (req, res, next) => {
     }
 };
 
+exports.getUserCourses = async (req, res, next) => {
+    try {
+        const courses = await progressService.getCoursesByUser(req.user.id);
+        res.json(courses);
+    } catch (err) {
+        next(err);
+    }
+};
+
 exports.getProgress = async (req, res, next) => {
     try {
         const { courseId } = req.params;

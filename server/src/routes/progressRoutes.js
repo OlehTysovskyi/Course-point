@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const {
     enroll,
+    getUserCourses,
     getProgress,
     updateProgress,
     unenroll
@@ -13,6 +14,26 @@ const { protect } = require('../middlewares/authMiddleware');
  *   name: Progress
  *   description: Прогрес користувача у курсі
  */
+
+/**
+ * @swagger
+ * /progress/courses:
+ *   get:
+ *     summary: Отримати всі курси, на які записаний поточний користувач
+ *     tags: [Progress]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Масив Course
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Course'
+ */
+router.get('/courses', protect, getUserCourses);
 
 /**
  * @swagger

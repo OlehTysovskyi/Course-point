@@ -5,9 +5,21 @@ class ProgressRepository {
         return Progress.create(data);
     }
 
+    async findByUser(userId) {
+        return Progress.find({ user: userId }).populate({
+            path: 'course',
+            populate: [
+                { path: 'teacher', select: 'name email' },
+                { path: 'lessons' },
+                { path: 'modules' }
+            ]
+        });
+    }
+
     async findByUserAndCourse(userId, courseId) {
         return Progress.findOne({ user: userId, course: courseId });
     }
+
 
     async update(progress) {
         return progress.save();
