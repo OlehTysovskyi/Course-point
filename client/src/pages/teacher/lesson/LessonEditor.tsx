@@ -1,44 +1,20 @@
-import { lazy, Suspense, useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { lazy, Suspense, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import {
-  createLesson,
-  getLessonById,
-  updateLesson,
-  ContentBlock,
-} from "../../../services/lessonService";
+import { ContentBlock } from "../../../services/lessonService";
 
 const TextEditor = lazy(() => import("../../../components/layout/TextEditor"));
 
-export default function LessonEditorPage() {
-  const params = useParams();
-  const lessonId = params.lessonId || null;
-  const [courseId, setCourseId] = useState<string | null>(null);
+type LessonEditorProps = {
+  mode: "create" | "edit";
+  onSave: (title: string, blocks: ContentBlock[]) => void;
+  initialData: { title: string; blocks: ContentBlock[] };
+  message?: string;
+};
 
-  const navigate = useNavigate();
-
-  const [title, setTitle] = useState("");
-  const [blocks, setBlocks] = useState<ContentBlock[]>([]);
+export default function LessonEditor({ mode, onSave, initialData, message }: LessonEditorProps) {
+  const [title, setTitle] = useState(initialData.title);
+  const [blocks, setBlocks] = useState<ContentBlock[]>(initialData.blocks);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-  if (lessonId && lessonId !== "new") {
-    getLessonById(lessonId)
-      .then((lesson) => {
-        setTitle(lesson.title);
-        setBlocks(lesson.blocks);
-        setCourseId(lesson.courseId);
-      })
-      .catch((err) => {
-        console.error("Помилка завантаження уроку:", err);
-      });
-  } else {
-    const paramCourseId = params.courseId || null;
-    if (paramCourseId) setCourseId(paramCourseId);
-  }
-}, [lessonId]);
-
 
   const createBlock = (type: ContentBlock["type"]): ContentBlock => {
     const id = uuidv4();
@@ -62,7 +38,7 @@ export default function LessonEditorPage() {
   const move = (i: number, dir: "up" | "down") => {
     const j = dir === "up" ? i - 1 : i + 1;
     if (j < 0 || j >= blocks.length) return;
-    const a = [...blocks];[a[i], a[j]] = [a[j], a[i]];
+    const a = [...blocks]; [a[i], a[j]] = [a[j], a[i]];
     setBlocks(a);
   };
   const remove = (i: number) => {
@@ -71,33 +47,14 @@ export default function LessonEditorPage() {
     if (activeId === bid) setActiveId(null);
   };
 
-  const handleSave = async () => {
-    if (!courseId) {
-      setMessage("Помилка: відсутній courseId.");
-      return;
-    }
-
-    const payload = { title, blocks, courseId};
-    console.log("Aaaaaaaaaaaaa"+payload.courseId)
-
-    try {
-      if (lessonId) {
-        await updateLesson(lessonId, payload);
-        setMessage("Урок оновлено! Тепер ви можете продовжити редагувати його.");
-      } else {
-        await createLesson(payload);
-        setMessage("Урок створено! Тепер ви можете редагувати його.");
-      }
-    } catch (err) {
-      console.error("Помилка збереження уроку:", err);
-      setMessage("Сталася помилка при збереженні уроку.");
-    }
+  const handleSave = () => {
+    onSave(title, blocks);
   };
 
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">
-        {lessonId && lessonId !== "new" ? "Редагувати урок" : "Створити урок"}
+        {mode === "edit" ? "Редагувати урок" : "Створити урок"}
       </h1>
 
       <input
@@ -129,23 +86,25 @@ export default function LessonEditorPage() {
             {blk.type === "heading" && (
               activeId === blk.id
                 ? <input
-                  type="text"
-                  value={blk.text}
-                  onChange={e => updateBlock(idx, b => ({ ...b, text: e.target.value }))}
-                  placeholder="Заголовок"
-                  className="w-full border mb-2 p-1 text-xl font-semibold"
-                />
+                    type="text"
+                    value={blk.text}
+                    onChange={e => updateBlock(idx, b => ({ ...b, text: e.target.value }))}
+                    placeholder="Заголовок"
+                    className="w-full border mb-2 p-1 text-xl font-semibold"
+                  />
                 : <h2 className="text-xl font-semibold">{blk.text}</h2>
             )}
 
             {blk.type === "paragraph" && (
               activeId === blk.id
                 ? <Suspense fallback={<div>Завантаження редактора...</div>}>
-                  <TextEditor
-                    content={blk.text || ""}
-                    onUpdate={(newContent: string) => updateBlock(idx, b => ({ ...b, text: newContent }))}
-                  />
-                </Suspense>
+                    <TextEditor
+                      content={blk.text || ""}
+                      onUpdate={(newContent: string) =>
+                        updateBlock(idx, b => ({ ...b, text: newContent }))
+                      }
+                    />
+                  </Suspense>
                 : <p dangerouslySetInnerHTML={{ __html: blk.text || "" }} />
             )}
 
@@ -164,9 +123,12 @@ export default function LessonEditorPage() {
                   />
                 )}
                 {activeId === blk.id && (
-                  <button onClick={() => updateBlock(idx, b => ({
-                    ...b, items: [...(b.items || []), ""]
-                  }))} className="text-sm text-blue-600">+Пункт</button>
+                  <button
+                    onClick={() => updateBlock(idx, b => ({
+                      ...b, items: [...(b.items || []), ""]
+                    }))}
+                    className="text-sm text-blue-600"
+                  >+Пункт</button>
                 )}
               </div>
             )}
@@ -174,20 +136,20 @@ export default function LessonEditorPage() {
             {blk.type === "quote" && (
               activeId === blk.id
                 ? <textarea
-                  value={blk.text}
-                  onChange={e => updateBlock(idx, b => ({ ...b, text: e.target.value }))}
-                  className="w-full border italic p-2"
-                />
+                    value={blk.text}
+                    onChange={e => updateBlock(idx, b => ({ ...b, text: e.target.value }))}
+                    className="w-full border italic p-2"
+                  />
                 : <blockquote className="italic border-l-4 pl-4">{blk.text}</blockquote>
             )}
 
             {blk.type === "code" && (
               activeId === blk.id
                 ? <textarea
-                  value={blk.code}
-                  onChange={e => updateBlock(idx, b => ({ ...b, code: e.target.value }))}
-                  className="w-full border font-mono p-2 bg-gray-100"
-                />
+                    value={blk.code}
+                    onChange={e => updateBlock(idx, b => ({ ...b, code: e.target.value }))}
+                    className="w-full border font-mono p-2 bg-gray-100"
+                  />
                 : <pre className="font-mono bg-gray-100 p-2">{blk.code}</pre>
             )}
 
@@ -216,9 +178,12 @@ export default function LessonEditorPage() {
                   />
                 )}
                 {activeId === blk.id && (
-                  <button onClick={() => updateBlock(idx, b => ({
-                    ...b, images: [...(b.images || []), ""]
-                  }))} className="text-sm text-blue-600">+Зображення</button>
+                  <button
+                    onClick={() => updateBlock(idx, b => ({
+                      ...b, images: [...(b.images || []), ""]
+                    }))}
+                    className="text-sm text-blue-600"
+                  >+Зображення</button>
                 )}
               </div>
             )}
@@ -245,9 +210,12 @@ export default function LessonEditorPage() {
                   />
                 )}
                 {activeId === blk.id && (
-                  <button onClick={() => updateBlock(idx, b => ({
-                    ...b, answers: [...(b.answers || []), ""]
-                  }))} className="text-sm text-blue-600">+Варіант</button>
+                  <button
+                    onClick={() => updateBlock(idx, b => ({
+                      ...b, answers: [...(b.answers || []), ""]
+                    }))}
+                    className="text-sm text-blue-600"
+                  >+Варіант</button>
                 )}
               </div>
             )}
@@ -267,7 +235,7 @@ export default function LessonEditorPage() {
         className="mt-6 bg-blue-600 text-white px-6 py-2 rounded"
         onClick={handleSave}
       >
-        Зберегти урок
+        {mode === "edit" ? "Зберегти зміни" : "Створити урок"}
       </button>
     </div>
   );

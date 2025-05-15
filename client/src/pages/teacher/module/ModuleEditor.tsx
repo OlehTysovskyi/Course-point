@@ -1,31 +1,24 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import {
-    createModule,
-    getModuleById,
-    updateModule,
-    ModuleQuestion,
-} from "../../../services/moduleService";
+import { ModuleQuestion } from "../../../services/moduleService";
 
-export default function ModuleEditorPage() {
-    const { moduleId, courseId: routeCourseId } = useParams();
-    const [title, setTitle] = useState("");
-    const [questions, setQuestions] = useState<ModuleQuestion[]>([]);
-    const [courseId, setCourseId] = useState<string | null>(null);
-    const [message, setMessage] = useState("");
+interface Props {
+    title: string;
+    setTitle: (val: string) => void;
+    questions: ModuleQuestion[];
+    setQuestions: (val: ModuleQuestion[]) => void;
+    onSave: () => void;
+    message: string;
+    heading: string;
+}
 
-    useEffect(() => {
-        if (moduleId && moduleId !== "new") {
-            getModuleById(moduleId).then((mod) => {
-                setTitle(mod.title);
-                setQuestions(mod.questions || []);
-                setCourseId(mod.course);
-            });
-        } else if (routeCourseId) {
-            setCourseId(routeCourseId);
-        }
-    }, [moduleId, routeCourseId]);
-
+export default function ModuleEditor({
+    title,
+    setTitle,
+    questions,
+    setQuestions,
+    onSave,
+    message,
+    heading,
+}: Props) {
     const addQuestion = () => {
         setQuestions((prev) => [
             ...prev,
@@ -46,37 +39,9 @@ export default function ModuleEditorPage() {
         setQuestions((prev) => prev.filter((_, i) => i !== index));
     };
 
-    const handleSave = async () => {
-        if (!courseId) {
-            setMessage("Немає courseId");
-            return;
-        }
-
-        const dto = {
-            title,
-            course: courseId,
-            questions,
-        };
-
-        try {
-            if (moduleId && moduleId !== "new") {
-                await updateModule(moduleId, dto);
-                setMessage("Модуль оновлено");
-            } else {
-                await createModule(dto);
-                setMessage("Модуль створено");
-            }
-        } catch (err) {
-            console.error(err);
-            setMessage("Помилка при збереженні модуля");
-        }
-    };
-
     return (
         <div className="max-w-4xl mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-4">
-                {moduleId && moduleId !== "new" ? "Редагування модуля" : "Створення модуля"}
-            </h1>
+            <h1 className="text-2xl font-bold mb-4">{heading}</h1>
 
             <div className="mb-4">
                 <label className="block mb-1 font-medium">Назва модуля</label>
@@ -136,8 +101,7 @@ export default function ModuleEditorPage() {
                                             const newAnswers = q.answers.filter((_, i) => i !== ansIdx);
                                             const newCorrectAnswers = q.correctAnswers
                                                 .filter((i) => i !== ansIdx)
-                                                .map((i) => (i > ansIdx ? i - 1 : i)); // оновлення індексів правильних відповідей
-
+                                                .map((i) => (i > ansIdx ? i - 1 : i));
                                             updateQuestion(idx, {
                                                 ...q,
                                                 answers: newAnswers,
@@ -199,7 +163,7 @@ export default function ModuleEditorPage() {
             <div className="mt-4">
                 <button
                     className="px-6 py-2 bg-blue-700 text-white rounded"
-                    onClick={handleSave}
+                    onClick={onSave}
                 >
                     Зберегти модуль
                 </button>
