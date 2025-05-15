@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getUsers, deleteUser, User } from '../../../services/userService';
+import { getUsers, deleteUser, User } from '../../../../services/userService';
 
 export default function AdminUsersTab({ searchTerm }: { searchTerm: string }) {
     const [users, setUsers] = useState<User[] | null>(null);

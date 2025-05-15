@@ -3,7 +3,7 @@ import {
     getAllCourses,
     updateCourse,
     Course
-} from '../../../services/courseService';
+} from '../../../../services/courseService';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminCoursesTab({ searchTerm }: { searchTerm: string }) {

@@ -15,13 +15,7 @@ class LessonRepository {
     }
 
     async findByCourseId(courseId) {
-        const course = await Course.findById(courseId).select('lessons');
-        if (!course) {
-            const err = new Error('Курс не знайдено');
-            err.statusCode = 404;
-            throw err;
-        }
-        return Lesson.find({ _id: { $in: course.lessons } });
+        return Lesson.find({ courseId: courseId });
     }
 
     async updateById(id, updateData) {

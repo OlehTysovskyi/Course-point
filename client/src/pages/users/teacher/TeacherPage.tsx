@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllCoursesByTeacher, Course } from "../../services/courseService";
-import { useAuth } from "../../context/AuthContext";
+import { getAllCoursesByTeacher, Course } from "../../../services/courseService";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function TeacherPage() {
   const [courses, setCourses] = useState<Course[]>([]);

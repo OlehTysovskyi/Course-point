@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllPublishedCourses, Course } from "../../services/courseService";
+import { getAllPublishedCourses, Course } from "../../../services/courseService";
+import { getAllUserCourses } from "../../../services/courseService";
 
 export default function StudentCoursesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,10 +15,12 @@ export default function StudentCoursesPage() {
     const fetchCourses = async () => {
       setLoading(true);
       try {
-        const courses = await getAllPublishedCourses();
-        setAllCourses(courses);
-        // Тут можна фільтрувати курси, які належать поточному студенту
-        setMyCourses([]); // Тимчасово порожній масив
+        const [all, mine] = await Promise.all([
+          getAllPublishedCourses(),
+          getAllUserCourses(),
+        ]);
+        setAllCourses(all);
+        setMyCourses(mine);
       } catch (err) {
         setError("Не вдалося завантажити курси. Спробуйте ще раз.");
       } finally {
@@ -65,7 +68,7 @@ export default function StudentCoursesPage() {
                 <p>{course.description}</p>
                 <p className="text-sm text-gray-500">Викладач: {course.teacher.name}</p>
                 <button
-                  onClick={() => navigate(`/courses/${course._id}`)}
+                  onClick={() => navigate(`/view-course/${course._id}`)}
                   className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                   Переглянути

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createCourse } from "../../services/courseService";
+import { createCourse } from "../../../services/courseService";
 
 export default function CreateCoursePage() {
   const [title, setTitle] = useState("");

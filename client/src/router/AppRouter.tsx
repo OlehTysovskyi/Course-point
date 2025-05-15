@@ -5,16 +5,18 @@ import MainLayout from "../components/layout/MainLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import HomePage from "../pages/HomePage";
-import StudentPage from "../pages/student/StudentPage";
-import CourseViewPage from "../pages/student/CourseViewPage";
-import TeacherPage from "../pages/teacher/TeacherPage";
-import CourseCreatePage from "../pages/teacher/CourseCreatePage";
-import CourseEditPage from "../pages/teacher/CourseEditPage";
-import LessonCreatePage from "../pages/teacher/lesson/LessonCreatePage";
-import LessonEditPage from "../pages/teacher/lesson/LessonEditPage";
-import ModuleCreatePage from "../pages/teacher/module/ModuleCreatePage";
-import ModuleEditPage from "../pages/teacher/module/ModuleEditPage";
-import AdminPage from "../pages/admin/AdminPage";
+import StudentPage from "../pages/users/student/StudentPage";
+import CourseViewPage from "../pages/content/course/CourseViewPage";
+import TeacherPage from "../pages/users/teacher/TeacherPage";
+import CourseCreatePage from "../pages/content/course/CourseCreatePage";
+import CourseEditPage from "../pages/content/course/CourseEditPage";
+import LessonCreatePage from "../pages/content/lesson/LessonCreatePage";
+import LessonEditPage from "../pages/content/lesson/LessonEditPage";
+import LessonViewPage from "../pages/content/lesson/LessonViewPage";
+import ModuleCreatePage from "../pages/content/module/ModuleCreatePage";
+import ModuleEditPage from "../pages/content/module/ModuleEditPage";
+import ModulePassPage from "../pages/content/module/ModulePassPage";
+import AdminPage from "../pages/users/admin/AdminPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import { JSX } from "react";
 
@@ -56,6 +58,22 @@ export default function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["student"]}>
               <CourseViewPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/view-lesson/:lessonId"
+          element={
+            <ProtectedRoute allowedRoles={["student"]}>
+              <LessonViewPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/view-module/:moduleId"
+          element={
+            <ProtectedRoute allowedRoles={["student"]}>
+              <ModulePassPage />
             </ProtectedRoute>
           }
         />

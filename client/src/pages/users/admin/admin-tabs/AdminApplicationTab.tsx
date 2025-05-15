@@ -4,7 +4,7 @@ import {
     approveRegistrationRequest,
     rejectRegistrationRequest,
     RegistrationRequest,
-} from '../../../services/authService';
+} from '../../../../services/authService';
 
 export default function AdminApplicationsTab({ searchTerm }: { searchTerm: string }) {
     const [applications, setApplications] = useState<RegistrationRequest[]>([]);

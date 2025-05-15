@@ -61,11 +61,8 @@ export const getAllPublishedCourses = async (): Promise<Course[]> => {
 
 export const getAllCoursesByTeacher = async (id: string): Promise<Course[]> => {
   try {
-    const token = localStorage.getItem("token");
     const response = await axios.get<Course[]>(`${API_URL}/courses/teacher/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: getAuthHeaders(),
     });
     return response.data;
   } catch (error) {
@@ -74,8 +71,17 @@ export const getAllCoursesByTeacher = async (id: string): Promise<Course[]> => {
   }
 };
 
-//Треба отримувати курси по прогресу шоб бачити тільки курси користувача разом з прогресом
-
+export const getAllUserCourses = async (): Promise<Course[]> => {
+    try {
+        const response = await axios.get<Course[]>(`${API_URL}/progress/courses`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user courses:", error);
+        throw error;
+    }
+};
 export const getCourseById = async (id: string): Promise<Course> => {
     try {
         const response = await axios.get<Course>(`${API_URL}/courses/${id}`);

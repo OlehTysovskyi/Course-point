@@ -65,14 +65,12 @@ export const getLessonById = async (id: string): Promise<Lesson> => {
     }
 };
 
-export const getLessonsByCourseId = async (courseId: string): Promise<Lesson> => {
+export const getLessonsByCourseId = async (courseId: string): Promise<Lesson[]> => {
     try {
-        const response = await axios.get<Lesson>(`${API_URL}/lessons/course/${courseId}`, {
-            headers: getAuthHeaders(),
-        });
+        const response = await axios.get<Lesson[]>(`${API_URL}/lessons/course/${courseId}`);
         return response.data;
     } catch (error) {
-        console.error(`Error fetching lesson with ID ${courseId}:`, error);
+        console.error(`Error fetching lessons for course ID ${courseId}:`, error);
         throw error;
     }
 };

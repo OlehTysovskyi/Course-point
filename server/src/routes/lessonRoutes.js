@@ -57,7 +57,7 @@ router.get('/', getAllLessons);
  *       404:
  *         description: Урок не знайдено
  */
-router.get('/:id', getLessonById);
+router.get('/:id', protect, getLessonById);
 
 /**
  * @swagger

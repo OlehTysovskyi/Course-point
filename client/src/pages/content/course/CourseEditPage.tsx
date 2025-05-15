@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCourseById, updateCourse } from "../../services/courseService";
-import { getAllLessons, Lesson } from "../../services/lessonService";
-import { getModulesByCourseId, Module } from "../../services/moduleService";
+import { getCourseById, updateCourse } from "../../../services/courseService";
+import { getLessonsByCourseId, Lesson } from "../../../services/lessonService";
+import { getModulesByCourseId, Module } from "../../../services/moduleService";
 
 export default function EditCoursePage() {
   const { courseId } = useParams();
@@ -21,8 +21,8 @@ export default function EditCoursePage() {
       setTitle(course.title);
       setDescription(course.description);
 
-      const allLessons = await getAllLessons();
-      setLessons(allLessons.filter(l => l.courseId === id));
+      const lessons = await getLessonsByCourseId(id);
+      setLessons(lessons);
 
       const mods = await getModulesByCourseId(id);
       setModules(mods);
