@@ -1,5 +1,24 @@
 const mongoose = require('mongoose');
 
+const QuestionSchema = new mongoose.Schema({
+    question: {
+        type: String,
+        required: true
+    },
+    answers: [{
+        type: String,
+        required: true
+    }],
+    correctAnswers: [{
+        type: Number,
+        required: true
+    }],
+    multiple: {
+        type: Boolean,
+        default: false
+    }
+}, { _id: false });
+
 const ModuleSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -19,9 +38,13 @@ const ModuleSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    questions: [{
-        type: Object
-    }],
+    grade: {
+        type: Number
+    },
+    questions: {
+        type: [QuestionSchema],
+        default: []
+    },
     createdAt: {
         type: Date,
         default: Date.now

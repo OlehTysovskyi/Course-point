@@ -304,6 +304,78 @@ const options = {
                     }
                 },
 
+                ModuleQuestion: {
+                    type: 'object',
+                    required: ['question', 'answers', 'correctAnswers'],
+                    properties: {
+                        question: {
+                            type: 'string',
+                            example: 'Яке ключове слово використовується для оголошення змінної в JavaScript?'
+                        },
+                        answers: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: ['var', 'let', 'const', 'function']
+                        },
+                        correctAnswers: {
+                            type: 'array',
+                            items: { type: 'integer' },
+                            description: 'Індекс(и) правильних відповідей у масиві answers',
+                            example: [1, 2]
+                        },
+                        multiple: {
+                            type: 'boolean',
+                            description: 'Чи може бути більше однієї правильної відповіді',
+                            example: true
+                        }
+                    }
+                },
+
+                // Схема вхідних даних для POST/PUT /modules
+                ModuleInput: {
+                    type: 'object',
+                    required: ['title', 'course', 'graded'],
+                    properties: {
+                        title: {
+                            type: 'string',
+                            example: 'Контрольний модуль з JavaScript'
+                        },
+                        course: {
+                            type: 'string',
+                            description: 'ID курсу',
+                            example: '60d5ef12fc13ae3c28000005'
+                        },
+                        lessons: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: []
+                        },
+                        graded: {
+                            type: 'boolean',
+                            description: 'Чи впливає модуль на оцінку',
+                            example: true
+                        },
+                        grade: {
+                            type: 'number',
+                            description: 'Вага модуля (максимальна кількість балів)',
+                            example: 10
+                        },
+                        questions: {
+                            type: 'array',
+                            items: { $ref: '#/components/schemas/ModuleQuestion' },
+                            example: [
+                                {
+                                    question: 'Що таке замикання?',
+                                    answers: ['Scope', 'Closure', 'Callback'],
+                                    correctAnswers: [1],
+                                    multiple: false
+                                }
+                            ]
+                        }
+                    }
+                },
+
+                // Повна відповідь від GET
                 Module: {
                     type: 'object',
                     required: ['_id', 'title', 'course', 'graded', 'createdAt'],
@@ -313,21 +385,14 @@ const options = {
                         course: { type: 'string', description: 'ID курсу' },
                         lessons: { type: 'array', items: { type: 'string' } },
                         graded: { type: 'boolean' },
-                        questions: { type: 'array', items: { type: 'object' } },
+                        grade: { type: 'number' },
+                        questions: {
+                            type: 'array',
+                            items: { $ref: '#/components/schemas/ModuleQuestion' }
+                        },
                         createdAt: { type: 'string', format: 'date-time' }
                     }
                 },
-                ModuleInput: {
-                    type: 'object',
-                    required: ['title', 'course', 'graded'],
-                    properties: {
-                        title: { type: 'string' },
-                        course: { type: 'string', description: 'ObjectId курсу' },
-                        lessons: { type: 'array', items: { type: 'string' }, example: [] },
-                        graded: { type: 'boolean', example: false },
-                        questions: { type: 'array', items: { type: 'object' }, example: [] }
-                    }
-                }
 
             }
         },

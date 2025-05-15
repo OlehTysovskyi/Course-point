@@ -6,6 +6,7 @@ const ProgressSchema = new mongoose.Schema({
     completedLessons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' }],
     passedModules: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Module' }],
     createdAt: { type: Date, default: Date.now }
+    // Add grade
 });
 
 module.exports = mongoose.model('Progress', ProgressSchema);
