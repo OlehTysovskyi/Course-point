@@ -7,6 +7,8 @@ export default function ModuleEditPage() {
     const { moduleId } = useParams();
     const [title, setTitle] = useState("");
     const [questions, setQuestions] = useState<ModuleQuestion[]>([]);
+    const [grade, setGrade] = useState(0);
+    const [graded, setGraded] = useState(false);
     const [message, setMessage] = useState("");
 
     useEffect(() => {
@@ -14,6 +16,8 @@ export default function ModuleEditPage() {
             getModuleById(moduleId).then((mod) => {
                 setTitle(mod.title);
                 setQuestions(mod.questions || []);
+                setGrade(mod.grade || 0);
+                setGraded(mod.graded || false);
             });
         }
     }, [moduleId]);
@@ -25,7 +29,13 @@ export default function ModuleEditPage() {
         }
 
         try {
-            await updateModule(moduleId, { title, course: "", questions });
+            await updateModule(moduleId, {
+                title,
+                course: "",
+                questions,
+                ...(graded && { grade }),
+                graded,
+            });
             setMessage("Модуль оновлено");
         } catch (err) {
             console.error(err);
@@ -39,9 +49,12 @@ export default function ModuleEditPage() {
             setTitle={setTitle}
             questions={questions}
             setQuestions={setQuestions}
+            grade={grade}
+            setGrade={setGrade}
             onSave={handleSave}
             message={message}
             heading="Редагування модуля"
+            graded={graded}
         />
     );
 }

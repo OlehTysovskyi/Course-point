@@ -29,6 +29,7 @@ export interface CreateModuleDto {
     course: string;
     lessons?: string[];
     graded?: boolean;
+    grade?: number;
     questions?: ModuleQuestion[];
 }
 

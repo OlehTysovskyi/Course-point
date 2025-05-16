@@ -1,4 +1,5 @@
 const progressRepo = require('../repositories/progressRepository');
+const moduleRepo = require('../repositories/ModuleRepository');
 
 class ProgressService {
     /**
@@ -34,46 +35,65 @@ class ProgressService {
 
     /**
      * Оновити прогрес (додавання уроку, модуля та оновлення grade)
-     * @param {{ userId, courseId, lessonId?, moduleId?, deltaGrade? }}
+     * @param {{ userId, courseId, lessonId?, moduleId? }}
      */
+    async updateProgress({ userId, courseId, lessonId, moduleId, answersMap }) {
+        const mod = await moduleRepo.findById(moduleId);
+        if (!mod) throw new Error('Module not found');
 
-    async updateProgress({ userId, courseId, moduleId, answersMap }) {
+        let score = 0;
 
-        const module = await require('../models/Module').findById(moduleId);
-        if (!module) throw Object.assign(new Error('Модуль не знайдено'), { statusCode: 404 });
+        if (answersMap) {
+            const questionsCount = mod.questions.length;
+            console.log("a" + questionsCount);
+            const questionWeight = mod.grade / questionsCount;
+            console.log("b" + questionWeight);
 
-        const G = module.grade || 0;
-        const Q = module.questions.length;
-        const W = Q > 0 ? G / Q : 0;
+            mod.questions.forEach((q, i) => {
+                const selected = (answersMap[i] || []).sort();
+                const correct = (q.correctAnswers || []).sort();
 
-        let totalDelta = 0;
+                // Кількість правильних вибраних відповідей
+                const correctSelectedCount = selected.filter(v => correct.includes(v)).length;
 
-        module.questions.forEach((q, idx) => {
-            const selected = answersMap[idx] || [];
-            const A = q.answers.length;
-            const C = q.correctAnswers.length;
-            const SC = selected.filter(i => q.correctAnswers.includes(i)).length;
-            const SW = selected.length - SC;
+                // Кількість неправильних вибраних відповідей
+                const incorrectSelectedCount = selected.filter(v => !correct.includes(v)).length;
 
-            const rawScore = C > 0 ? W * (SC / C) : 0;
-            const penalty = (A - C) > 0 ? W * (SW / (A - C)) : 0;
-            const score_i = Math.max(0, rawScore - penalty);
+                // Частка правильних відповідей по питанню
+                const correctRatio = correct.length > 0 ? (correctSelectedCount / correct.length) : 0;
 
-            totalDelta += score_i;
-        });
+                // Штраф за неправильні відповіді (підкоригуй, якщо потрібно)
+                const penaltyPerWrong = 0.25;
+                let questionScore = correctRatio - (penaltyPerWrong * incorrectSelectedCount);
+                if (questionScore < 0) questionScore = 0;
 
-        let p = await progressRepo.findByUserAndCourse(userId, courseId);
-        if (!p) p = await progressRepo.create({ user: userId, course: courseId });
+                score += questionScore * questionWeight;
+            });
 
-        if (!p.passedModules.includes(moduleId)) {
-            p.passedModules.push(moduleId);
+            // Масштабуємо відносний бал до максимальної оцінки модуля
+            const maxScore = mod.maxScore || 1; // якщо maxScore не вказано — 1 (щоб не було помилки)
+            score = score * maxScore;
         }
 
-        p.grade = (p.grade || 0) + totalDelta;
+        let progress = await progressRepo.findByUserAndCourse(userId, courseId);
+        if (!progress) {
+            progress = await progressRepo.create({
+                user: userId,
+                course: courseId,
+                passedModules: [],
+                completedLessons: [],
+                grade: 0,
+            });
+        }
 
-        return progressRepo.update(p);
+        if (!progress.passedModules.includes(moduleId)) {
+            progress.passedModules.push(moduleId);
+            progress.grade += score;
+        }
+
+        await progressRepo.update(progress);
+        return progress;
     }
-
 
     /**
      * Видалити прогрес (наприклад при виході з курсу)

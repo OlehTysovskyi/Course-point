@@ -1,12 +1,16 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { createModule, ModuleQuestion } from "../../../services/moduleService";
 import ModuleForm from "./ModuleEditor";
 
 export default function ModuleCreatePage() {
     const { courseId } = useParams();
+    const [searchParams] = useSearchParams();
+    const graded = searchParams.get("graded") === "true";
+
     const [title, setTitle] = useState("");
     const [questions, setQuestions] = useState<ModuleQuestion[]>([]);
+    const [grade, setGrade] = useState(0);
     const [message, setMessage] = useState("");
 
     const handleSave = async () => {
@@ -16,7 +20,13 @@ export default function ModuleCreatePage() {
         }
 
         try {
-            await createModule({ title, course: courseId, questions });
+            await createModule({
+                title,
+                course: courseId,
+                questions,
+                ...(graded && { grade }),
+                graded,
+            });
             setMessage("Модуль створено");
         } catch (err) {
             console.error(err);
@@ -30,9 +40,12 @@ export default function ModuleCreatePage() {
             setTitle={setTitle}
             questions={questions}
             setQuestions={setQuestions}
+            grade={grade}
+            setGrade={setGrade}
             onSave={handleSave}
             message={message}
-            heading="Створення модуля"
+            heading={graded ? "Створення оцінювального модуля" : "Створення неоцінювального модуля"}
+            graded={graded}
         />
     );
 }

@@ -2,7 +2,7 @@ const moduleRepo = require('../repositories/moduleRepository');
 
 class ModuleService {
     async createModule(dto) {
-        const { title, course, lessons = [], graded = false, questions = [] } = dto;
+        const { title, course, lessons = [], graded = false, grade = 0, questions = [] } = dto;
         if (!course) {
             const err = new Error('Поле course (ID курсу) є обов’язковим');
             err.statusCode = 400; throw err;
@@ -25,7 +25,14 @@ class ModuleService {
             const err = new Error('Невірні типи полів lessons/graded/questions');
             err.statusCode = 400; throw err;
         }
-        return moduleRepo.create({ title, course, lessons, graded, questions });
+        if (graded) {
+            if (typeof grade !== 'number' || grade <= 0) {
+                const err = new Error('Поле grade обовʼязкове для оцінювального модуля і має бути додатнім числом');
+                err.statusCode = 400;
+                throw err;
+            }
+        }
+        return moduleRepo.create({ title, course, lessons, graded, grade, questions });
     }
 
     async getAllModules() {

@@ -76,7 +76,8 @@ router.post('/enroll', protect, enroll);
  *       - in: path
  *         name: courseId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Дані прогресу
@@ -91,7 +92,7 @@ router.get('/:courseId', protect, getProgress);
 
 /**
  * @swagger
- * /progress/{courseId}:
+ * /progress/{courseId}/{moduleId}:
  *   patch:
  *     summary: Оновити прогрес (додати lesson, module, grade)
  *     tags: [Progress]
@@ -101,7 +102,13 @@ router.get('/:courseId', protect, getProgress);
  *       - in: path
  *         name: courseId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: moduleId
+ *         required: true
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -111,11 +118,10 @@ router.get('/:courseId', protect, getProgress);
  *             properties:
  *               lessonId:
  *                 type: string
- *               moduleId:
- *                 type: string
+ *                 description: ID уроку, який треба додати (опційно)
  *               deltaGrade:
  *                 type: number
- *                 description: Кількість балів для додавання
+ *                 description: Кількість балів для додавання (опційно)
  *     responses:
  *       200:
  *         description: Оновлений прогрес
@@ -124,7 +130,7 @@ router.get('/:courseId', protect, getProgress);
  *             schema:
  *               $ref: '#/components/schemas/Progress'
  */
-router.patch('/:courseId', protect, updateProgress);
+router.patch('/:courseId/:moduleId', protect, updateProgress);
 
 /**
  * @swagger
@@ -138,7 +144,8 @@ router.patch('/:courseId', protect, updateProgress);
  *       - in: path
  *         name: courseId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *     responses:
  *       204:
  *         description: Прогрес видалено

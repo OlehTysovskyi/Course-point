@@ -31,20 +31,24 @@ exports.getProgress = async (req, res, next) => {
 
 exports.updateProgress = async (req, res, next) => {
     try {
-        const { lessonId, moduleId, deltaGrade } = req.body;
-        const { courseId } = req.params;
+        const { lessonId, answersMap } = req.body;
+        const { courseId, moduleId } = req.params;
+        const userId = req.user.id;
+
         const progress = await progressService.updateProgress({
-            userId: req.user.id,
+            userId,
             courseId,
             lessonId,
             moduleId,
-            deltaGrade
+            answersMap,
         });
+
         res.json(progress);
     } catch (err) {
         next(err);
     }
 };
+
 
 exports.unenroll = async (req, res, next) => {
     try {

@@ -54,7 +54,7 @@ export default function EditCoursePage() {
 
   const handleCreateModule = (graded: boolean) => {
     if (!courseId) return;
-    navigate(`/teacher/create-module/new/${courseId}?graded=${graded}`);
+    navigate(`/teacher/create-module/${courseId}?graded=${graded}`);
   };
 
   if (loading) {
@@ -91,17 +91,18 @@ export default function EditCoursePage() {
           ➕ Додати урок
         </button>
         <button
-          onClick={() => navigate(`/teacher/create-module/${courseId}`)}
+          onClick={() => handleCreateModule(false)}
           className="px-4 py-2 rounded-md text-white bg-yellow-500 hover:bg-yellow-600"
         >
           ➕ Неоцінювальний модуль
         </button>
         <button
-          onClick={() => navigate(`/teacher/create-module/${courseId}`)}
+          onClick={() => handleCreateModule(true)}
           className="px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700"
         >
           ➕ Оцінювальний модуль
         </button>
+
       </div>
 
       {message && <p className="text-green-500 mb-4">{message}</p>}

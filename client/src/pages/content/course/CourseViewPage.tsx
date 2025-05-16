@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getCourseById } from "../../../services/courseService";
 import { getLessonsByCourseId, Lesson } from "../../../services/lessonService";
 import { getModulesByCourseId, Module } from "../../../services/moduleService";
+import { enrollToCourse, getProgressByCourse } from "../../../services/progresService";
 
 export default function CourseViewPage() {
   const { courseId } = useParams();
@@ -13,6 +14,10 @@ export default function CourseViewPage() {
   const [modules, setModules] = useState<Module[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const [progressCreated, setProgressCreated] = useState(false);
+  const [creatingProgress, setCreatingProgress] = useState(false);
+  const [createProgressError, setCreateProgressError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCourseAndContent = async () => {
@@ -27,6 +32,9 @@ export default function CourseViewPage() {
 
           const mods = await getModulesByCourseId(courseId);
           setModules(mods);
+
+          const progress = await getProgressByCourse(courseId);
+          setProgressCreated(progress !== null);
         } catch (err) {
           console.error("Помилка завантаження:", err);
           setError("Не вдалося завантажити курс або вміст.");
@@ -38,6 +46,21 @@ export default function CourseViewPage() {
 
     fetchCourseAndContent();
   }, [courseId]);
+
+  const handleStartCourse = async () => {
+    if (!courseId) return;
+    setCreatingProgress(true);
+    setCreateProgressError(null);
+    try {
+      await enrollToCourse(courseId);
+      setProgressCreated(true);
+    } catch (err) {
+      console.error("Помилка створення прогресу:", err);
+      setCreateProgressError("Не вдалося почати курс. Спробуйте пізніше.");
+    } finally {
+      setCreatingProgress(false);
+    }
+  };
 
   if (loading) {
     return <div className="max-w-4xl mx-auto py-8 px-4">Завантаження...</div>;
@@ -53,6 +76,20 @@ export default function CourseViewPage() {
         <>
           <h1 className="text-3xl font-bold mb-6">{course.title}</h1>
           <p className="mb-6">{course.description}</p>
+
+          {!progressCreated ? (
+            <button
+              onClick={handleStartCourse}
+              disabled={creatingProgress}
+              className="mb-6 px-5 py-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+            >
+              {creatingProgress ? "Починаємо курс..." : "Почати курс"}
+            </button>
+          ) : (
+            <p className="mb-6 text-green-700 font-semibold">Курс розпочато!</p>
+          )}
+
+          {createProgressError && <p className="text-red-600 mb-6">{createProgressError}</p>}
 
           <div className="mt-6">
             <h2 className="text-xl font-semibold mb-4">Уроки курсу:</h2>
@@ -85,8 +122,9 @@ export default function CourseViewPage() {
                       {mod.title} {mod.graded ? "(оцінювальний)" : "(неоцінювальний)"}
                     </span>
                     <button
-                      onClick={() => navigate(`/view-module/${mod._id}`)}
-                      className="text-blue-600 hover:underline"
+                      onClick={() => navigate(`/view-module/${courseId}/${mod._id}`)}
+                      className={`text-blue-600 hover:underline ${!progressCreated ? "pointer-events-none opacity-50" : ""}`}
+                      title={!progressCreated ? "Спочатку почніть курс" : ""}
                     >
                       👁 Переглянути
                     </button>

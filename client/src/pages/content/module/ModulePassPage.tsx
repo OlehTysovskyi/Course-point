@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getModuleById } from "../../../services/moduleService";
-import { ModuleQuestion } from "../../../services/moduleService";
+import { getModuleById, ModuleQuestion } from "../../../services/moduleService";
+import { updateProgress } from "../../../services/progresService";
 
 export default function ModuleTakePage() {
-    const { moduleId } = useParams();
+    const { courseId, moduleId } = useParams<{ courseId: string; moduleId: string }>();
     const [questions, setQuestions] = useState<ModuleQuestion[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [answers, setAnswers] = useState<number[][]>([]);
     const [completed, setCompleted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [submitSuccess, setSubmitSuccess] = useState(false);
 
     useEffect(() => {
-        console.log("aaaaa"+moduleId);
-
         if (moduleId) {
             getModuleById(moduleId).then((mod) => {
                 setQuestions(mod.questions || []);
@@ -57,8 +58,8 @@ export default function ModuleTakePage() {
     const calculateScore = () => {
         let score = 0;
         questions.forEach((q, i) => {
-            const selected = answers[i].sort();
-            const correct = q.correctAnswers.sort();
+            const selected = answers[i].slice().sort();
+            const correct = q.correctAnswers.slice().sort();
             if (selected.length === correct.length && selected.every((v, idx) => v === correct[idx])) {
                 score += 1;
             }
@@ -66,14 +67,49 @@ export default function ModuleTakePage() {
         return score;
     };
 
+    useEffect(() => {
+        const submitProgress = async () => {
+            if (!completed || !moduleId || !courseId) return;
+
+            const map: Record<number, number[]> = {};
+            answers.forEach((ans, i) => {
+                if (ans.length > 0) {
+                    map[i] = ans;
+                }
+            });
+
+            setIsSubmitting(true);
+            setSubmitError(null);
+            try {
+                await updateProgress(courseId, moduleId, {
+                    lessonId: undefined,
+                    answersMap: map
+                });
+                setSubmitSuccess(true);
+            } catch (e) {
+                setSubmitError("Не вдалося оновити прогрес. Спробуйте пізніше.");
+            } finally {
+                setIsSubmitting(false);
+            }
+        };
+
+        submitProgress();
+    }, [completed]);
+
+
     if (!questions.length) return <div className="p-6">Завантаження...</div>;
 
     if (completed) {
         const score = calculateScore();
+
         return (
             <div className="p-6 max-w-3xl mx-auto">
                 <h2 className="text-2xl font-bold mb-4">Модуль завершено</h2>
-                <p>Ваш результат: {score} / {questions.length}</p>
+                <p className="mb-2">Ваш результат: {score} / {questions.length}</p>
+
+                {isSubmitting && <p className="text-blue-600">Оцінювання та збереження результату...</p>}
+                {submitSuccess && <p className="text-green-600">Прогрес успішно оновлено!</p>}
+                {submitError && <p className="text-red-600">{submitError}</p>}
             </div>
         );
     }

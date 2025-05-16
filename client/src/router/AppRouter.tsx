@@ -10,6 +10,7 @@ import CourseViewPage from "../pages/content/course/CourseViewPage";
 import TeacherPage from "../pages/users/teacher/TeacherPage";
 import CourseCreatePage from "../pages/content/course/CourseCreatePage";
 import CourseEditPage from "../pages/content/course/CourseEditPage";
+import CoursesListPage from "../pages/content/course/CoursesListPage";
 import LessonCreatePage from "../pages/content/lesson/LessonCreatePage";
 import LessonEditPage from "../pages/content/lesson/LessonEditPage";
 import LessonViewPage from "../pages/content/lesson/LessonViewPage";
@@ -62,6 +63,14 @@ export default function AppRouter() {
           }
         />
         <Route
+          path="/courses-list"
+          element={
+            <ProtectedRoute allowedRoles={["student"]}>
+              <CoursesListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/view-lesson/:lessonId"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
@@ -70,7 +79,7 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/view-module/:moduleId"
+          path="/view-module/:courseId/:moduleId"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
               <ModulePassPage />

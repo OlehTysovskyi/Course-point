@@ -5,6 +5,9 @@ interface Props {
     setTitle: (val: string) => void;
     questions: ModuleQuestion[];
     setQuestions: (val: ModuleQuestion[]) => void;
+    graded: boolean;
+    grade: number;
+    setGrade: (val: number) => void;
     onSave: () => void;
     message: string;
     heading: string;
@@ -15,6 +18,9 @@ export default function ModuleEditor({
     setTitle,
     questions,
     setQuestions,
+    graded,
+    grade,
+    setGrade,
     onSave,
     message,
     heading,
@@ -52,6 +58,18 @@ export default function ModuleEditor({
                     onChange={(e) => setTitle(e.target.value)}
                 />
             </div>
+
+            {graded && (
+                <div className="mb-4">
+                    <label className="block mb-1 font-medium">Максимальна оцінка за модуль</label>
+                    <input
+                        type="number"
+                        className="w-full border p-2 rounded"
+                        value={grade}
+                        onChange={(e) => setGrade(Number(e.target.value))}
+                    />
+                </div>
+            )}
 
             <div className="space-y-6">
                 {questions.map((q, idx) => (
