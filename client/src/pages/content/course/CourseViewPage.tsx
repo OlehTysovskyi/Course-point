@@ -15,7 +15,7 @@ export default function CourseViewPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [progressCreated, setProgressCreated] = useState(false);
+  const [progress, setProgress] = useState<{ grade: number } | null>(null);
   const [creatingProgress, setCreatingProgress] = useState(false);
   const [createProgressError, setCreateProgressError] = useState<string | null>(null);
 
@@ -33,8 +33,8 @@ export default function CourseViewPage() {
           const mods = await getModulesByCourseId(courseId);
           setModules(mods);
 
-          const progress = await getProgressByCourse(courseId);
-          setProgressCreated(progress !== null);
+          const fetchedProgress = await getProgressByCourse(courseId);
+          setProgress(fetchedProgress);
         } catch (err) {
           console.error("Помилка завантаження:", err);
           setError("Не вдалося завантажити курс або вміст.");
@@ -53,13 +53,42 @@ export default function CourseViewPage() {
     setCreateProgressError(null);
     try {
       await enrollToCourse(courseId);
-      setProgressCreated(true);
+      setProgress({ grade: 0 });
     } catch (err) {
       console.error("Помилка створення прогресу:", err);
       setCreateProgressError("Не вдалося почати курс. Спробуйте пізніше.");
     } finally {
       setCreatingProgress(false);
     }
+  };
+
+  const combinedContent = () => {
+    if (lessons.length === 0) return [];
+
+    const modulesByLastLessonId: Record<string, Module[]> = {};
+
+    modules.forEach((mod) => {
+      if (mod.lessons && mod.lessons.length > 0) {
+        const lastLessonId = mod.lessons[mod.lessons.length - 1];
+        if (!modulesByLastLessonId[lastLessonId]) {
+          modulesByLastLessonId[lastLessonId] = [];
+        }
+        modulesByLastLessonId[lastLessonId].push(mod);
+      }
+    });
+
+    const combined: Array<{ type: "lesson" | "module"; data: Lesson | Module }> = [];
+
+    lessons.forEach((lesson) => {
+      combined.push({ type: "lesson", data: lesson });
+
+      const modsAfterLesson = modulesByLastLessonId[lesson._id];
+      if (modsAfterLesson) {
+        modsAfterLesson.forEach((mod) => combined.push({ type: "module", data: mod }));
+      }
+    });
+
+    return combined;
   };
 
   if (loading) {
@@ -77,7 +106,7 @@ export default function CourseViewPage() {
           <h1 className="text-3xl font-bold mb-6">{course.title}</h1>
           <p className="mb-6">{course.description}</p>
 
-          {!progressCreated ? (
+          {!progress ? (
             <button
               onClick={handleStartCourse}
               disabled={creatingProgress}
@@ -86,53 +115,51 @@ export default function CourseViewPage() {
               {creatingProgress ? "Починаємо курс..." : "Почати курс"}
             </button>
           ) : (
-            <p className="mb-6 text-green-700 font-semibold">Курс розпочато!</p>
+            <p className="mb-6 text-green-700 font-semibold">
+              Ви вже на курсі. Оцінка: {progress.grade} / 100
+            </p>
           )}
 
           {createProgressError && <p className="text-red-600 mb-6">{createProgressError}</p>}
 
           <div className="mt-6">
-            <h2 className="text-xl font-semibold mb-4">Уроки курсу:</h2>
-            {lessons.length > 0 ? (
+            <h2 className="text-xl font-semibold mb-4">Вміст курсу:</h2>
+            {lessons.length + modules.length > 0 ? (
               <ul className="space-y-2">
-                {lessons.map((lesson) => (
-                  <li key={lesson._id} className="flex justify-between items-center bg-gray-100 p-3 rounded-md">
-                    <span>{lesson.title}</span>
-                    <button
-                      onClick={() => navigate(`/view-lesson/${lesson._id}`)}
-                      className="text-blue-600 hover:underline"
-                    >
-                      👁 Переглянути
-                    </button>
-                  </li>
-                ))}
+                {combinedContent().map((item) => {
+                  if (item.type === "lesson") {
+                    const lesson = item.data as Lesson;
+                    return (
+                      <li
+                        key={"lesson-" + lesson._id}
+                        className={`bg-gray-100 p-3 rounded-md hover:bg-gray-200 transition cursor-pointer ${
+                          !progress ? "opacity-50 pointer-events-none" : ""
+                        }`}
+                        onClick={() => progress && navigate(`/view-lesson/${lesson._id}`)}
+                        title={!progress ? "Спочатку почніть курс" : ""}
+                      >
+                        📘 {lesson.title}
+                      </li>
+                    );
+                  } else {
+                    const mod = item.data as Module;
+                    return (
+                      <li
+                        key={"module-" + mod._id}
+                        className={`bg-blue-100 p-3 rounded-md hover:bg-blue-200 transition cursor-pointer ${
+                          !progress ? "opacity-50 pointer-events-none" : ""
+                        }`}
+                        onClick={() => progress && navigate(`/view-module/${courseId}/${mod._id}`)}
+                        title={!progress ? "Спочатку почніть курс" : ""}
+                      >
+                        📚 {mod.title} {mod.graded ? "(оцінювальний)" : "(неоцінювальний)"}
+                      </li>
+                    );
+                  }
+                })}
               </ul>
             ) : (
-              <p>Уроків поки немає.</p>
-            )}
-          </div>
-
-          <div className="mt-10">
-            <h2 className="text-xl font-semibold mb-4">Модулі курсу:</h2>
-            {modules.length > 0 ? (
-              <ul className="space-y-2">
-                {modules.map((mod) => (
-                  <li key={mod._id} className="flex justify-between items-center bg-gray-100 p-3 rounded-md">
-                    <span>
-                      {mod.title} {mod.graded ? "(оцінювальний)" : "(неоцінювальний)"}
-                    </span>
-                    <button
-                      onClick={() => navigate(`/view-module/${courseId}/${mod._id}`)}
-                      className={`text-blue-600 hover:underline ${!progressCreated ? "pointer-events-none opacity-50" : ""}`}
-                      title={!progressCreated ? "Спочатку почніть курс" : ""}
-                    >
-                      👁 Переглянути
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>Модулів поки немає.</p>
+              <p>Вмісту поки немає.</p>
             )}
           </div>
         </>

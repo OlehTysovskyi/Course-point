@@ -11,6 +11,7 @@ export default function ModuleCreatePage() {
     const [title, setTitle] = useState("");
     const [questions, setQuestions] = useState<ModuleQuestion[]>([]);
     const [grade, setGrade] = useState(0);
+    const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
     const [message, setMessage] = useState("");
 
     const handleSave = async () => {
@@ -23,6 +24,7 @@ export default function ModuleCreatePage() {
             await createModule({
                 title,
                 course: courseId,
+                lessons: selectedLessonIds,
                 questions,
                 ...(graded && { grade }),
                 graded,
@@ -46,6 +48,9 @@ export default function ModuleCreatePage() {
             message={message}
             heading={graded ? "Створення оцінювального модуля" : "Створення неоцінювального модуля"}
             graded={graded}
+            courseId={courseId || ""}
+            selectedLessonIds={selectedLessonIds}
+            setSelectedLessonIds={setSelectedLessonIds}
         />
     );
 }

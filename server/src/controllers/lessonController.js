@@ -36,6 +36,15 @@ exports.getLessonsByCourseId = async (req, res, next) => {
     }
 };
 
+exports.getAvailableLessonsByCourseId = async (req, res, next) => {
+    try {
+        const availabeLessons = await lessonService.getAvailableLessonsByCourseId(req.params.courseId);
+        res.json(availabeLessons);
+    } catch (err) {
+        next(err);
+    }
+};
+
 exports.updateLesson = async (req, res, next) => {
     try {
         const updated = await lessonService.updateLesson(req.params.id, req.body);

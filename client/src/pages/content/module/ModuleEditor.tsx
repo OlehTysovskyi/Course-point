@@ -1,4 +1,6 @@
+import { useEffect, useState, useRef } from "react";
 import { ModuleQuestion } from "../../../services/moduleService";
+import { Lesson, getAvailableLessonsByCourseId } from "../../../services/lessonService";
 
 interface Props {
     title: string;
@@ -11,6 +13,9 @@ interface Props {
     onSave: () => void;
     message: string;
     heading: string;
+    courseId: string;
+    selectedLessonIds: string[];
+    setSelectedLessonIds: (ids: string[]) => void;
 }
 
 export default function ModuleEditor({
@@ -24,7 +29,46 @@ export default function ModuleEditor({
     onSave,
     message,
     heading,
+    courseId,
+    selectedLessonIds,
+    setSelectedLessonIds,
 }: Props) {
+    const [lessons, setLessons] = useState<Lesson[]>([]);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        getAvailableLessonsByCourseId(courseId)
+            .then(setLessons)
+            .catch(console.error);
+    }, [courseId]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const toggleLesson = (lessonId: string) => {
+        if (selectedLessonIds.includes(lessonId)) {
+            setSelectedLessonIds(selectedLessonIds.filter((id) => id !== lessonId));
+        } else {
+            setSelectedLessonIds([...selectedLessonIds, lessonId]);
+        }
+    };
+
+    const selectedTitles = lessons
+        .filter((lesson) => selectedLessonIds.includes(lesson._id))
+        .map((lesson) => lesson.title);
+
     const addQuestion = () => {
         setQuestions((prev) => [
             ...prev,
@@ -70,6 +114,43 @@ export default function ModuleEditor({
                     />
                 </div>
             )}
+
+            <div className="mb-4 relative" ref={dropdownRef}>
+                <label
+                    className="block mb-1 font-medium cursor-pointer"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                    Уроки, до яких належить модуль
+                </label>
+
+                <div
+                    className="border p-2 rounded cursor-pointer bg-white"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                    {selectedTitles.length > 0
+                        ? selectedTitles.join(", ")
+                        : "Виберіть уроки..."}
+                </div>
+
+                {dropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto border rounded bg-white shadow-lg">
+                        {lessons.map((lesson) => (
+                            <label
+                                key={lesson._id}
+                                className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
+                            >
+                                <input
+                                    type="checkbox"
+                                    className="mr-2"
+                                    checked={selectedLessonIds.includes(lesson._id)}
+                                    onChange={() => toggleLesson(lesson._id)}
+                                />
+                                <span>{lesson.title}</span>
+                            </label>
+                        ))}
+                    </div>
+                )}
+            </div>
 
             <div className="space-y-6">
                 {questions.map((q, idx) => (

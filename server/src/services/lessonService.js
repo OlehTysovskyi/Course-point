@@ -1,4 +1,5 @@
 const lessonRepository = require('../repositories/lessonRepository');
+const moduleRepository = require('../repositories/moduleRepository');
 const { v4: uuidv4 } = require('uuid');
 
 const mongoose = require('mongoose');
@@ -48,6 +49,22 @@ class LessonService {
 
     async getLessonsByCourseId(courseId) {
         return lessonRepository.findByCourseId(courseId);
+    }
+
+    async getAvailableLessonsByCourseId(courseId) {
+        const lessons = await this.getLessonsByCourseId(courseId);
+
+        const modules = await moduleRepository.findByCourseId(courseId);
+
+        const takenLessonIds = modules
+            .flatMap(mod => mod.lessons.map(lessonObj => lessonObj._id || lessonObj))
+            .map(String);
+
+        const availableLessons = lessons.filter(
+            lesson => !takenLessonIds.includes(String(lesson._id))
+        );
+
+        return availableLessons;
     }
 
     async updateLesson(id, dto) {

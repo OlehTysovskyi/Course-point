@@ -27,8 +27,8 @@ export interface Module {
 export interface CreateModuleDto {
     title: string;
     course: string;
-    lessons?: string[];
-    graded?: boolean;
+    lessons: string[];
+    graded: boolean;
     grade?: number;
     questions?: ModuleQuestion[];
 }

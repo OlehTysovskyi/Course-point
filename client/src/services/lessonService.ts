@@ -75,6 +75,18 @@ export const getLessonsByCourseId = async (courseId: string): Promise<Lesson[]> 
     }
 };
 
+export const getAvailableLessonsByCourseId = async (courseId: string): Promise<Lesson[]> => {
+    try {
+        const response = await axios.get<Lesson[]>(`${API_URL}/lessons/course/${courseId}/available`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching available lessons for course ID ${courseId}:`, error);
+        throw error;
+    }
+};
+
 export const createLesson = async (lesson: CreateLessonDto): Promise<Lesson> => {
     try {
         console.log("Creating lesson with courseId:", lesson.courseId);

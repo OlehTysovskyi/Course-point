@@ -5,11 +5,15 @@ import ModuleEditor from "./ModuleEditor";
 
 export default function ModuleEditPage() {
     const { moduleId } = useParams();
+
     const [title, setTitle] = useState("");
     const [questions, setQuestions] = useState<ModuleQuestion[]>([]);
     const [grade, setGrade] = useState(0);
     const [graded, setGraded] = useState(false);
     const [message, setMessage] = useState("");
+
+    const [courseId, setCourseId] = useState<string>("");
+    const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
 
     useEffect(() => {
         if (moduleId) {
@@ -18,6 +22,8 @@ export default function ModuleEditPage() {
                 setQuestions(mod.questions || []);
                 setGrade(mod.grade || 0);
                 setGraded(mod.graded || false);
+                setCourseId(mod.course);
+                setSelectedLessonIds(mod.lessons || []);
             });
         }
     }, [moduleId]);
@@ -27,11 +33,16 @@ export default function ModuleEditPage() {
             setMessage("Немає moduleId");
             return;
         }
+        if (!courseId) {
+            setMessage("Немає courseId");
+            return;
+        }
 
         try {
             await updateModule(moduleId, {
                 title,
-                course: "",
+                course: courseId,
+                lessons: selectedLessonIds,
                 questions,
                 ...(graded && { grade }),
                 graded,
@@ -55,6 +66,9 @@ export default function ModuleEditPage() {
             message={message}
             heading="Редагування модуля"
             graded={graded}
+            courseId={courseId}
+            selectedLessonIds={selectedLessonIds}
+            setSelectedLessonIds={setSelectedLessonIds}
         />
     );
 }

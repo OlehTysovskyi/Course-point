@@ -26,9 +26,7 @@ class ProgressService {
     async getProgress(userId, courseId) {
         const p = await progressRepo.findByUserAndCourse(userId, courseId);
         if (!p) {
-            const err = new Error('Прогрес не знайдено');
-            err.statusCode = 404;
-            throw err;
+            return null;
         }
         return p;
     }

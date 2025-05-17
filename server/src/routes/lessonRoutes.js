@@ -4,6 +4,7 @@ const {
     getAllLessons,
     getLessonById,
     getLessonsByCourseId,
+    getAvailableLessonsByCourseId,
     updateLesson,
     deleteLesson
 } = require('../controllers/lessonController');
@@ -85,6 +86,37 @@ router.get('/:id', protect, getLessonById);
  *         description: Курс не знайдено
  */
 router.get('/course/:courseId', getLessonsByCourseId);
+
+/**
+ * @swagger
+ * /lessons/course/{courseId}/available:
+ *   get:
+ *     summary: Отримати доступні уроки курсу (які не зайняті у модулях)
+ *     tags: [Lessons]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ObjectId курсу
+ *     responses:
+ *       200:
+ *         description: Масив доступних уроків
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Lesson'
+ *       401:
+ *         description: Не авторизовано
+ *       404:
+ *         description: Курс не знайдено
+ */
+router.get('/course/:courseId/available', protect, getAvailableLessonsByCourseId);
 
 /**
  * @swagger
