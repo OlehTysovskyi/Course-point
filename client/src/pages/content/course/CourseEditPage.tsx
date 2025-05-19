@@ -37,7 +37,6 @@ export default function EditCoursePage() {
     loadData();
   }, [courseId]);
 
-  // Формуємо комбінований список: після уроку додаємо всі модулі, де цей урок — останній в списку lessons
   const combinedContent = () => {
     const modulesByLastLessonId: Record<string, Module[]> = {};
     modules.forEach((mod) => {
@@ -71,6 +70,28 @@ export default function EditCoursePage() {
         <>
           <h1 className="text-3xl font-bold mb-6">Редагування курсу: {course.title}</h1>
           <p className="mb-6">{course.description}</p>
+
+          {/* Кнопки для створення */}
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={() => navigate(`/teacher/create-lesson/${courseId}`)}
+              className="px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700"
+            >
+              ➕ Додати урок
+            </button>
+            <button
+              onClick={() => navigate(`/teacher/create-module/${courseId}?graded=false`)}
+              className="px-4 py-2 rounded-md text-white bg-yellow-500 hover:bg-yellow-600"
+            >
+              ➕ Неоцінювальний модуль
+            </button>
+            <button
+              onClick={() => navigate(`/teacher/create-module/${courseId}?graded=true`)}
+              className="px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700"
+            >
+              ➕ Оцінювальний модуль
+            </button>
+          </div>
 
           <div>
             <h2 className="text-xl font-semibold mb-4">Уроки та модулі курсу</h2>
