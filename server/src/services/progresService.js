@@ -1,5 +1,6 @@
 const progressRepo = require('../repositories/progressRepository');
 const moduleRepo = require('../repositories/ModuleRepository');
+const lessonRepo = require('../repositories/LessonRepository');
 
 class ProgressService {
     /**
@@ -33,9 +34,33 @@ class ProgressService {
 
     /**
      * Оновити прогрес (додавання уроку, модуля та оновлення grade)
-     * @param {{ userId, courseId, lessonId?, moduleId? }}
+     * @param {{ userId, courseId, lessonId? }}
      */
-    async updateProgress({ userId, courseId, lessonId, moduleId, answersMap }) {
+    async updateProgressForLesson({ userId, courseId, lessonId }) {
+        let progress = await progressRepo.findByUserAndCourse(userId, courseId);
+        if (!progress) {
+            progress = await progressRepo.create({
+                user: userId,
+                course: courseId,
+                passedModules: [],
+                completedLessons: [],
+                grade: 0,
+            });
+        }
+
+        if (!progress.completedLessons.includes(lessonId)) {
+            progress.completedLessons.push(lessonId);
+        }
+
+        await progressRepo.update(progress);
+        return progress;
+    }
+
+    /**
+     * Оновити прогрес (додавання уроку, модуля та оновлення grade)
+     * @param {{ userId, courseId, moduleId? }}
+     */
+    async updateProgressForModule({ userId, courseId, moduleId, answersMap }) {
         const mod = await moduleRepo.findById(moduleId);
         if (!mod) throw new Error('Module not found');
 
@@ -51,16 +76,12 @@ class ProgressService {
                 const selected = (answersMap[i] || []).sort();
                 const correct = (q.correctAnswers || []).sort();
 
-                // Кількість правильних вибраних відповідей
                 const correctSelectedCount = selected.filter(v => correct.includes(v)).length;
 
-                // Кількість неправильних вибраних відповідей
                 const incorrectSelectedCount = selected.filter(v => !correct.includes(v)).length;
 
-                // Частка правильних відповідей по питанню
                 const correctRatio = correct.length > 0 ? (correctSelectedCount / correct.length) : 0;
 
-                // Штраф за неправильні відповіді (підкоригуй, якщо потрібно)
                 const penaltyPerWrong = 0.25;
                 let questionScore = correctRatio - (penaltyPerWrong * incorrectSelectedCount);
                 if (questionScore < 0) questionScore = 0;
@@ -68,8 +89,7 @@ class ProgressService {
                 score += questionScore * questionWeight;
             });
 
-            // Масштабуємо відносний бал до максимальної оцінки модуля
-            const maxScore = mod.maxScore || 1; // якщо maxScore не вказано — 1 (щоб не було помилки)
+            const maxScore = mod.maxScore || 1;
             score = score * maxScore;
         }
 

@@ -11,7 +11,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-primary to-blue-500 text-white shadow-lg py-4 px-6 flex justify-between items-center sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg py-4 px-6 flex justify-between items-center sticky top-0 z-50">
       <h1
         className="text-2xl font-extrabold cursor-pointer drop-shadow-sm hover:text-white/90 transition"
         onClick={() => navigate("/")}

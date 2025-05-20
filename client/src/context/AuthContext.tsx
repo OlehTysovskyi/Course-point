@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { login, register, verifyToken } from "../services/authService"; // Імпортуємо сервіс
+import { login, register, verifyToken } from "../services/authService";
 
 interface User {
   id: string;
@@ -26,7 +26,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const loginHandler = async (email: string, password: string) => {
     setLoading(true);
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const decoded = verifyToken(token); // Декодуємо токен
+        const decoded = verifyToken(token);
         setUser({
           id: decoded.id,
           email: decoded.email,
@@ -78,7 +78,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout();
       }
     }
+    setLoading(false);
   }, []);
+
 
   return (
     <AuthContext.Provider

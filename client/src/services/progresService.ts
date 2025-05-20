@@ -17,6 +17,7 @@ export interface Progress {
     _id: string;
     user: string;
     course: string;
+    completedLessons: string[];
     passedModules: string[];
     grade: number;
     createdAt: string;
@@ -53,14 +54,14 @@ export const getProgressByCourse = async (courseId: string): Promise<Progress> =
 
 export const updateProgress = async (
     courseId: string,
-    moduleId: string,
-    data: Omit<UpdateProgressInput, 'moduleId'>
+    data: UpdateProgressInput
 ): Promise<Progress> => {
-    const response = await axios.patch<Progress>(`${API_URL}/progress/${courseId}/${moduleId}`, data, {
+    const response = await axios.patch<Progress>(`${API_URL}/progress/${courseId}`, data, {
         headers: getAuthHeaders(),
     });
     return response.data;
 };
+
 
 export const unenrollFromCourse = async (courseId: string): Promise<void> => {
     await axios.delete(`${API_URL}/progress/${courseId}`, {

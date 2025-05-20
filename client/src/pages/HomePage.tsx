@@ -1,17 +1,20 @@
-import HeroSection from "../components/admin/HeroSection";
-import FeaturesSection from "../components/admin/FeaturesSection";
-import PopularCoursesSection from "../components/admin/PopularCoursesSection";
-import TestimonialsSection from "../components/admin/TestimonialsSection";
-import CallToActionSection from "../components/admin/CallToActionSection";
+import { useAuth } from "../context/AuthContext";
+import HeroSection from "../components/HeroSection";
+import FeaturesSection from "../components/FeaturesSection";
+import PopularCoursesSection from "../components/PopularCoursesSection";
+import TestimonialsSection from "../components/TestimonialsSection";
+import CallToActionSection from "../components/CallToActionSection";
 
 export default function HomePage() {
+  const { isAuthenticated } = useAuth();
+
   return (
-    <div className="home pt-32 pb-32">
+    <div className="home pb-32">
       <HeroSection />
       <FeaturesSection />
       <PopularCoursesSection />
       <TestimonialsSection />
-      <CallToActionSection />
+      {!isAuthenticated && <CallToActionSection />}
     </div>
   );
 }

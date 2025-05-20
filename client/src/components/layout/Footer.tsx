@@ -1,4 +1,21 @@
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+
 export default function Footer() {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    navigate("/");
+  };
+
   return (
     <footer className="bg-gray-900 text-gray-300 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-8 grid sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -9,9 +26,39 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold mb-2 text-white">Посилання</h4>
           <ul className="text-sm space-y-1">
-            <li><a href="/" className="hover:underline">Головна</a></li>
-            <li><a href="/courses" className="hover:underline">Курси</a></li>
-            <li><a href="/login" className="hover:underline">Увійти</a></li>
+            <li>
+              <button
+                onClick={() => navigate("/")}
+                className="hover:underline focus:outline-none"
+              >
+                Головна
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => navigate("/courses-list")}
+                className="hover:underline focus:outline-none"
+              >
+                Курси
+              </button>
+            </li>
+            <li>
+              {isLoggedIn ? (
+                <button
+                  onClick={handleLogout}
+                  className="hover:underline focus:outline-none"
+                >
+                  Вийти
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate("/login")}
+                  className="hover:underline focus:outline-none"
+                >
+                  Увійти
+                </button>
+              )}
+            </li>
           </ul>
         </div>
         <div>

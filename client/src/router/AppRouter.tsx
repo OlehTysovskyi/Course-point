@@ -57,7 +57,7 @@ export default function AppRouter() {
         <Route
           path="/view-course/:courseId"
           element={
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute allowedRoles={["student", "admin", "teacher"]}>
               <CourseViewPage />
             </ProtectedRoute>
           }
@@ -65,15 +65,15 @@ export default function AppRouter() {
         <Route
           path="/courses-list"
           element={
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute allowedRoles={["student", "admin", "teacher"]}>
               <CoursesListPage />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/view-lesson/:lessonId"
+          path="/view-lesson/:courseId/:lessonId"
           element={
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute allowedRoles={["student", "admin"]}>
               <LessonViewPage />
             </ProtectedRoute>
           }
@@ -81,7 +81,7 @@ export default function AppRouter() {
         <Route
           path="/view-module/:courseId/:moduleId"
           element={
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute allowedRoles={["student", "admin"]}>
               <ModulePassPage />
             </ProtectedRoute>
           }

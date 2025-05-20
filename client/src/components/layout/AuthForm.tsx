@@ -55,7 +55,7 @@ export default function AuthForm({ title, showRole = false, onSuccess }: Props) 
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex min-h-screen items-center justify-center">
       <form
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-2xl shadow-md w-full max-w-sm"
@@ -64,7 +64,7 @@ export default function AuthForm({ title, showRole = false, onSuccess }: Props) 
 
         {error && <p className="text-red-600 text-sm mb-4 text-center">{error}</p>}
 
-        {showRole && ( // ДОДАНО поле ім'я тільки для реєстрації
+        {showRole && (
           <input
             type="text"
             placeholder="Ім'я"

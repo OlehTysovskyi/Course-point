@@ -3,48 +3,57 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getCourseById } from "../../../services/courseService";
 import { getLessonsByCourseId, Lesson } from "../../../services/lessonService";
 import { getModulesByCourseId, Module } from "../../../services/moduleService";
-import { enrollToCourse, getProgressByCourse } from "../../../services/progresService";
+import {
+  enrollToCourse,
+  getProgressByCourse,
+  Progress,
+} from "../../../services/progresService";
+import { BackButton } from "../../../components/ui/BackButton";
+import { useAuth } from "../../../context/AuthContext"; // <- імпорт контексту
 
 export default function CourseViewPage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
 
+  const { user } = useAuth(); // отримуємо користувача з контексту
+  const isAdmin = user?.role === "admin";
+
   const [course, setCourse] = useState<{ title: string; description: string } | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [progress, setProgress] = useState<Progress | null>(null);
 
-  const [progress, setProgress] = useState<{ grade: number } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [creatingProgress, setCreatingProgress] = useState(false);
   const [createProgressError, setCreateProgressError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCourseAndContent = async () => {
-      if (courseId) {
-        setLoading(true);
-        try {
-          const course = await getCourseById(courseId);
-          setCourse(course);
+    const fetchData = async () => {
+      if (!courseId) return;
+      setLoading(true);
+      setError(null);
 
-          const lessons = await getLessonsByCourseId(courseId);
-          setLessons(lessons);
-
-          const mods = await getModulesByCourseId(courseId);
-          setModules(mods);
-
-          const fetchedProgress = await getProgressByCourse(courseId);
-          setProgress(fetchedProgress);
-        } catch (err) {
-          console.error("Помилка завантаження:", err);
-          setError("Не вдалося завантажити курс або вміст.");
-        } finally {
-          setLoading(false);
-        }
+      try {
+        const [course, lessons, modules, fetchedProgress] = await Promise.all([
+          getCourseById(courseId),
+          getLessonsByCourseId(courseId),
+          getModulesByCourseId(courseId),
+          getProgressByCourse(courseId),
+        ]);
+        setCourse(course);
+        setLessons(lessons);
+        setModules(modules);
+        setProgress(fetchedProgress);
+      } catch (err) {
+        console.error("Load error:", err);
+        setError("Не вдалося завантажити курс або його вміст.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchCourseAndContent();
+    fetchData();
   }, [courseId]);
 
   const handleStartCourse = async () => {
@@ -52,10 +61,10 @@ export default function CourseViewPage() {
     setCreatingProgress(true);
     setCreateProgressError(null);
     try {
-      await enrollToCourse(courseId);
-      setProgress({ grade: 0 });
+      const created = await enrollToCourse(courseId);
+      setProgress(created);
     } catch (err) {
-      console.error("Помилка створення прогресу:", err);
+      console.error("Enrollment error:", err);
       setCreateProgressError("Не вдалося почати курс. Спробуйте пізніше.");
     } finally {
       setCreatingProgress(false);
@@ -63,107 +72,159 @@ export default function CourseViewPage() {
   };
 
   const combinedContent = () => {
-    if (lessons.length === 0) return [];
-
-    const modulesByLastLessonId: Record<string, Module[]> = {};
+    const modulesByLesson: Record<string, Module[]> = {};
+    const unlinkedModules: Module[] = [];
 
     modules.forEach((mod) => {
       if (mod.lessons && mod.lessons.length > 0) {
-        const lastLessonId = mod.lessons[mod.lessons.length - 1];
-        if (!modulesByLastLessonId[lastLessonId]) {
-          modulesByLastLessonId[lastLessonId] = [];
-        }
-        modulesByLastLessonId[lastLessonId].push(mod);
+        const lastLesson = mod.lessons[mod.lessons.length - 1];
+        modulesByLesson[lastLesson] = [...(modulesByLesson[lastLesson] || []), mod];
+      } else {
+        unlinkedModules.push(mod);
       }
     });
 
-    const combined: Array<{ type: "lesson" | "module"; data: Lesson | Module }> = [];
+    const result: Array<{ type: "lesson" | "module"; data: Lesson | Module }> = [];
 
     lessons.forEach((lesson) => {
-      combined.push({ type: "lesson", data: lesson });
-
-      const modsAfterLesson = modulesByLastLessonId[lesson._id];
-      if (modsAfterLesson) {
-        modsAfterLesson.forEach((mod) => combined.push({ type: "module", data: mod }));
-      }
+      result.push({ type: "lesson", data: lesson });
+      const mods = modulesByLesson[lesson._id] || [];
+      mods.forEach((mod) => result.push({ type: "module", data: mod }));
     });
 
-    return combined;
+    unlinkedModules.forEach((mod) => result.push({ type: "module", data: mod }));
+
+    return result;
   };
 
-  if (loading) {
-    return <div className="max-w-4xl mx-auto py-8 px-4">Завантаження...</div>;
-  }
+  const renderProgress = () => {
+    if (!progress) return null;
 
-  if (error) {
-    return <div className="max-w-4xl mx-auto py-8 px-4 text-red-500">{error}</div>;
-  }
+    const totalItems = lessons.length + modules.length;
+    const completedItems =
+      (progress.completedLessons?.length || 0) + (progress.passedModules?.length || 0);
+    const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+    return (
+      <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-xl">
+        <h3 className="font-semibold text-green-700 text-lg mb-2">Ваш прогрес:</h3>
+        <ul className="space-y-1 text-green-800 text-sm">
+          <li>📘 Уроків пройдено: {progress.completedLessons.length} з {lessons.length}</li>
+          <li>📚 Модулів пройдено: {progress.passedModules.length} з {modules.length}</li>
+          <li>🏆 Загальна оцінка: <span className="font-bold">{progress.grade}</span> / 100</li>
+        </ul>
+        <div className="mt-4">
+          <div className="h-3 bg-green-200 rounded-full overflow-hidden">
+            <div
+              className="h-3 bg-green-600"
+              style={{ width: `${percentage}%` }}
+            ></div>
+          </div>
+          <p className="mt-1 text-xs text-green-600 text-right">{percentage}% завершено</p>
+        </div>
+      </div>
+    );
+  };
+
+  if (loading)
+    return <div className="p-6 text-center text-blue-600 text-lg">Завантаження курсу...</div>;
+
+  if (error)
+    return <div className="p-6 text-center text-red-600 text-lg">{error}</div>;
+
+  if (!course) return null;
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      {course && (
-        <>
-          <h1 className="text-3xl font-bold mb-6">{course.title}</h1>
-          <p className="mb-6">{course.description}</p>
+    <div className="max-w-4xl mx-auto py-10 px-4">
+      <h1 className="text-4xl font-bold mb-4 text-center text-indigo-800">{course.title}</h1>
+      <p className="text-lg text-gray-700 mb-6 text-center">{course.description}</p>
 
-          {!progress ? (
-            <button
-              onClick={handleStartCourse}
-              disabled={creatingProgress}
-              className="mb-6 px-5 py-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-            >
-              {creatingProgress ? "Починаємо курс..." : "Почати курс"}
-            </button>
-          ) : (
-            <p className="mb-6 text-green-700 font-semibold">
-              Ви вже на курсі. Оцінка: {progress.grade} / 100
-            </p>
+      {/* Кнопка старту курсу показується лише якщо користувач не адмін і progress ще немає */}
+      {!progress && !isAdmin ? (
+        <div className="text-center mb-8">
+          <button
+            onClick={handleStartCourse}
+            disabled={creatingProgress}
+            className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition disabled:opacity-50"
+          >
+            {creatingProgress ? "Починаємо курс..." : "Почати курс"}
+          </button>
+          {createProgressError && (
+            <p className="mt-2 text-red-600">{createProgressError}</p>
           )}
-
-          {createProgressError && <p className="text-red-600 mb-6">{createProgressError}</p>}
-
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold mb-4">Вміст курсу:</h2>
-            {lessons.length + modules.length > 0 ? (
-              <ul className="space-y-2">
-                {combinedContent().map((item) => {
-                  if (item.type === "lesson") {
-                    const lesson = item.data as Lesson;
-                    return (
-                      <li
-                        key={"lesson-" + lesson._id}
-                        className={`bg-gray-100 p-3 rounded-md hover:bg-gray-200 transition cursor-pointer ${
-                          !progress ? "opacity-50 pointer-events-none" : ""
-                        }`}
-                        onClick={() => progress && navigate(`/view-lesson/${lesson._id}`)}
-                        title={!progress ? "Спочатку почніть курс" : ""}
-                      >
-                        📘 {lesson.title}
-                      </li>
-                    );
-                  } else {
-                    const mod = item.data as Module;
-                    return (
-                      <li
-                        key={"module-" + mod._id}
-                        className={`bg-blue-100 p-3 rounded-md hover:bg-blue-200 transition cursor-pointer ${
-                          !progress ? "opacity-50 pointer-events-none" : ""
-                        }`}
-                        onClick={() => progress && navigate(`/view-module/${courseId}/${mod._id}`)}
-                        title={!progress ? "Спочатку почніть курс" : ""}
-                      >
-                        📚 {mod.title} {mod.graded ? "(оцінювальний)" : "(неоцінювальний)"}
-                      </li>
-                    );
-                  }
-                })}
-              </ul>
-            ) : (
-              <p>Вмісту поки немає.</p>
-            )}
-          </div>
-        </>
+        </div>
+      ) : (
+        renderProgress()
       )}
+
+      <div>
+        <h2 className="text-3xl font-bold mb-4 text-center text-indigo-800">🧭 Навчальний шлях</h2>
+
+        {lessons.length + modules.length === 0 ? (
+          <p className="text-gray-600">Вмісту поки немає.</p>
+        ) : (
+          <div className="space-y-4">
+            {combinedContent().map((item) => {
+              const isLesson = item.type === "lesson";
+              const data = item.data;
+              const completed = isLesson
+                ? progress?.completedLessons.includes((data as Lesson)._id)
+                : progress?.passedModules.includes((data as Module)._id);
+
+              const title = isLesson
+                ? (data as Lesson).title
+                : (data as Module).title;
+
+              const subtitle = isLesson
+                ? "Урок"
+                : (data as Module).graded
+                  ? "Модуль (оцінювальний)"
+                  : "Модуль (неоцінювальний)";
+
+              const handleClick = () => {
+                // Адмін може переходити навіть без прогресу
+                if (!progress && !isAdmin) return;
+                if (isLesson) {
+                  navigate(`/view-lesson/${courseId}/${(data as Lesson)._id}`);
+                } else {
+                  navigate(`/view-module/${courseId}/${(data as Module)._id}`);
+                }
+              };
+
+              return (
+                <div
+                  key={`${item.type}-${(data as any)._id}`}
+                  onClick={handleClick}
+                  className={`flex items-center justify-between gap-4 border p-4 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md ${!progress && !isAdmin ? "opacity-50 cursor-not-allowed" : "bg-white"
+                    }`}
+                  title={!progress && !isAdmin ? "Спочатку почніть курс" : ""}
+                >
+                  <div>
+                    <p className="text-lg font-medium text-gray-800">{title}</p>
+                    <p className="text-sm text-gray-500">{subtitle}</p>
+                  </div>
+                  <div>
+                    {completed ? (
+                      <span className="inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full shadow-sm">
+                        ✓ Пройдено
+                      </span>
+                    ) : (
+                      <span className="inline-block bg-gray-100 text-gray-500 text-sm font-medium px-3 py-1 rounded-full shadow-sm">
+                        ⏳ Не завершено
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-10 text-center">
+        <BackButton />
+      </div>
     </div>
   );
 }
+

@@ -130,7 +130,7 @@ router.get('/:courseId', protect, getProgress);
  *             schema:
  *               $ref: '#/components/schemas/Progress'
  */
-router.patch('/:courseId/:moduleId', protect, updateProgress);
+router.patch('/:courseId', protect, updateProgress);
 
 /**
  * @swagger
