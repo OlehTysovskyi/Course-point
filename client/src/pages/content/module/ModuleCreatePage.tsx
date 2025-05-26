@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { createModule, ModuleQuestion } from "../../../services/moduleService";
-import ModuleForm from "./ModuleEditor";
+import ModuleEditor from "./ModuleEditor";
+import { BackButton } from "../../../components/ui/BackButton";
 
 export default function ModuleCreatePage() {
     const { courseId } = useParams();
@@ -37,20 +38,26 @@ export default function ModuleCreatePage() {
     };
 
     return (
-        <ModuleForm
-            title={title}
-            setTitle={setTitle}
-            questions={questions}
-            setQuestions={setQuestions}
-            grade={grade}
-            setGrade={setGrade}
-            onSave={handleSave}
-            message={message}
-            heading={graded ? "Створення оцінювального модуля" : "Створення неоцінювального модуля"}
-            graded={graded}
-            courseId={courseId || ""}
-            selectedLessonIds={selectedLessonIds}
-            setSelectedLessonIds={setSelectedLessonIds}
-        />
+        <div className="min-h-screen py-8 px-4">
+            <ModuleEditor
+                title={title}
+                setTitle={setTitle}
+                questions={questions}
+                setQuestions={setQuestions}
+                grade={grade}
+                setGrade={setGrade}
+                onSave={handleSave}
+                message={message}
+                heading={graded ? "Створення оцінювального модуля" : "Створення неоцінювального модуля"}
+                graded={graded}
+                courseId={courseId || ""}
+                selectedLessonIds={selectedLessonIds}
+                setSelectedLessonIds={setSelectedLessonIds}
+            />
+
+            <div className="mt-10 text-center">
+                <BackButton />
+            </div>
+        </div>
     );
 }

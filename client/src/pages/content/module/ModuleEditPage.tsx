@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getModuleById, updateModule, ModuleQuestion } from "../../../services/moduleService";
 import ModuleEditor from "./ModuleEditor";
+import { BackButton } from "../../../components/ui/BackButton";
 
 export default function ModuleEditPage() {
     const { moduleId } = useParams();
@@ -55,20 +56,27 @@ export default function ModuleEditPage() {
     };
 
     return (
-        <ModuleEditor
-            title={title}
-            setTitle={setTitle}
-            questions={questions}
-            setQuestions={setQuestions}
-            grade={grade}
-            setGrade={setGrade}
-            onSave={handleSave}
-            message={message}
-            heading="Редагування модуля"
-            graded={graded}
-            courseId={courseId}
-            selectedLessonIds={selectedLessonIds}
-            setSelectedLessonIds={setSelectedLessonIds}
-        />
+        <div className="min-h-screen py-8 px-4">
+            <ModuleEditor
+                title={title}
+                setTitle={setTitle}
+                questions={questions}
+                setQuestions={setQuestions}
+                grade={grade}
+                setGrade={setGrade}
+                onSave={handleSave}
+                message={message}
+                heading="Редагування модуля"
+                graded={graded}
+                courseId={courseId}
+                selectedLessonIds={selectedLessonIds}
+                setSelectedLessonIds={setSelectedLessonIds}
+            />
+
+            <div className="mt-10 text-center">
+                <BackButton />
+            </div>
+        </div>
     );
+
 }

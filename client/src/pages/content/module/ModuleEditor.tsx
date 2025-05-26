@@ -35,21 +35,15 @@ export default function ModuleEditor({
 }: Props) {
     const [lessons, setLessons] = useState<Lesson[]>([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        getAvailableLessonsByCourseId(courseId)
-            .then(setLessons)
-            .catch(console.error);
+        getAvailableLessonsByCourseId(courseId).then(setLessons).catch(console.error);
     }, [courseId]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node)
-            ) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setDropdownOpen(false);
             }
         };
@@ -90,184 +84,157 @@ export default function ModuleEditor({
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-4">{heading}</h1>
+        <div className="max-w-3xl mx-auto p-8 bg-white rounded-2xl shadow-lg">
+            <h1 className="text-4xl font-bold mb-8 text-gray-900">{heading}</h1>
 
-            <div className="mb-4">
-                <label className="block mb-1 font-medium">Назва модуля</label>
-                <input
-                    type="text"
-                    className="w-full border p-2 rounded"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
+            <label className="block mb-2 font-semibold text-gray-700">Назва модуля</label>
+            <input
+                type="text"
+                className="w-full border border-gray-300 rounded-xl p-3 mb-8 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <div className="mb-8">
+                <label className="block mb-2 font-semibold text-gray-700">Уроки модуля</label>
+                <div className="relative" ref={dropdownRef}>
+                    <button
+                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-full text-sm transition font-medium"
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                    >
+                        {dropdownOpen ? "Закрити список" : "Обрати уроки"}
+                    </button>
+
+                    {dropdownOpen && (
+                        <div className="absolute z-10 bg-white border border-gray-200 rounded-lg shadow-lg p-2 w-full mt-2 max-h-48 overflow-y-auto">
+                            {lessons.map((lesson) => (
+                                <div
+                                    key={lesson._id}
+                                    onClick={() => toggleLesson(lesson._id)}
+                                    className={`cursor-pointer px-3 py-2 rounded-lg transition ${selectedLessonIds.includes(lesson._id)
+                                        ? "bg-blue-100 font-semibold text-blue-800"
+                                        : "hover:bg-gray-100"
+                                        }`}
+                                >
+                                    {lesson.title}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <div className="mt-2 text-sm text-gray-600">
+                        Обрані уроки: {selectedTitles.join(", ") || "немає"}
+                    </div>
+                </div>
             </div>
 
             {graded && (
-                <div className="mb-4">
-                    <label className="block mb-1 font-medium">Максимальна оцінка за модуль</label>
+                <div className="mb-8">
+                    <label className="block mb-2 font-semibold text-gray-700">Максимальна оцінка</label>
                     <input
                         type="number"
-                        className="w-full border p-2 rounded"
+                        className="w-full border border-gray-300 rounded-xl p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={grade}
                         onChange={(e) => setGrade(Number(e.target.value))}
                     />
                 </div>
             )}
 
-            <div className="mb-4 relative" ref={dropdownRef}>
-                <label
-                    className="block mb-1 font-medium cursor-pointer"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                >
-                    Уроки, до яких належить модуль
-                </label>
+            <div className="mb-10">
+                <label className="block mb-2 font-semibold text-gray-700">Питання</label>
+                <div className="space-y-6">
+                    {questions.map((q, idx) => (
+                        <div
+                            key={idx}
+                            className="border border-gray-200 rounded-xl p-5 shadow-sm transition hover:shadow-md bg-gray-50"
+                        >
+                            <input
+                                type="text"
+                                className="w-full border-b text-lg border-gray-400 rounded-xl font-medium p-2 mb-3 focus:outline-none focus:border-blue-500"
+                                value={q.question}
+                                onChange={(e) => updateQuestion(idx, { ...q, question: e.target.value })}
+                                placeholder="Питання"
+                            />
 
-                <div
-                    className="border p-2 rounded cursor-pointer bg-white"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                >
-                    {selectedTitles.length > 0
-                        ? selectedTitles.join(", ")
-                        : "Виберіть уроки..."}
-                </div>
-
-                {dropdownOpen && (
-                    <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto border rounded bg-white shadow-lg">
-                        {lessons.map((lesson) => (
-                            <label
-                                key={lesson._id}
-                                className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
-                            >
+                            <label className="flex items-center mb-4 text-sm text-gray-700">
                                 <input
                                     type="checkbox"
                                     className="mr-2"
-                                    checked={selectedLessonIds.includes(lesson._id)}
-                                    onChange={() => toggleLesson(lesson._id)}
+                                    checked={q.multiple}
+                                    onChange={(e) => updateQuestion(idx, { ...q, multiple: e.target.checked })}
                                 />
-                                <span>{lesson.title}</span>
+                                Декілька правильних відповідей
                             </label>
-                        ))}
-                    </div>
-                )}
-            </div>
 
-            <div className="space-y-6">
-                {questions.map((q, idx) => (
-                    <div key={idx} className="border p-4 rounded">
-                        <label className="block mb-1 font-semibold">Питання {idx + 1}</label>
-                        <input
-                            type="text"
-                            className="w-full mb-2 border p-2 rounded"
-                            value={q.question}
-                            onChange={(e) =>
-                                updateQuestion(idx, { ...q, question: e.target.value })
-                            }
-                        />
-
-                        <div className="space-y-2">
-                            {q.answers.map((ans, ansIdx) => (
-                                <div key={ansIdx} className="flex items-center gap-2">
+                            {q.answers.map((ans, i) => (
+                                <div key={i} className="flex items-center gap-2 mb-2">
                                     <input
-                                        type="text"
-                                        className="flex-1 border p-1 rounded"
+                                        className="flex-1 border rounded-xl p-2"
                                         value={ans}
                                         onChange={(e) => {
                                             const newAnswers = [...q.answers];
-                                            newAnswers[ansIdx] = e.target.value;
+                                            newAnswers[i] = e.target.value;
                                             updateQuestion(idx, { ...q, answers: newAnswers });
                                         }}
+                                        placeholder={`Відповідь ${i + 1}`}
                                     />
                                     <input
-                                        type={q.multiple ? "checkbox" : "radio"}
-                                        name={`correct-${idx}`}
-                                        checked={q.correctAnswers.includes(ansIdx)}
-                                        onChange={() => {
-                                            let newCorrect: number[];
-                                            if (q.multiple) {
-                                                newCorrect = q.correctAnswers.includes(ansIdx)
-                                                    ? q.correctAnswers.filter((i) => i !== ansIdx)
-                                                    : [...q.correctAnswers, ansIdx];
-                                            } else {
-                                                newCorrect = [ansIdx];
-                                            }
-                                            updateQuestion(idx, { ...q, correctAnswers: newCorrect });
-                                        }}
-                                    />
-                                    <button
-                                        className="text-red-600 hover:underline text-sm"
-                                        onClick={() => {
-                                            const newAnswers = q.answers.filter((_, i) => i !== ansIdx);
-                                            const newCorrectAnswers = q.correctAnswers
-                                                .filter((i) => i !== ansIdx)
-                                                .map((i) => (i > ansIdx ? i - 1 : i));
+                                        type="checkbox"
+                                        checked={q.correctAnswers.includes(i)}
+                                        onChange={(e) => {
+                                            const newCorrectAnswers = q.correctAnswers.includes(i)
+                                                ? q.correctAnswers.filter((ci) => ci !== i)
+                                                : [...q.correctAnswers, i];
+
                                             updateQuestion(idx, {
                                                 ...q,
-                                                answers: newAnswers,
-                                                correctAnswers: newCorrectAnswers,
+                                                correctAnswers: q.multiple ? newCorrectAnswers : [i],
                                             });
                                         }}
-                                        title="Видалити відповідь"
-                                    >
-                                        🗑
-                                    </button>
+                                        title="Правильна відповідь"
+                                    />
                                 </div>
                             ))}
-                        </div>
 
-                        <button
-                            className="text-sm text-blue-600 mt-2"
-                            onClick={() => {
-                                const newAnswers = [...q.answers, `Варіант ${q.answers.length + 1}`];
-                                updateQuestion(idx, { ...q, answers: newAnswers });
-                            }}
-                        >
-                            + Додати відповідь
-                        </button>
-
-                        <div className="mt-2">
-                            <label className="mr-2">Кілька відповідей?</label>
-                            <input
-                                type="checkbox"
-                                checked={q.multiple}
-                                onChange={(e) => {
+                            <button
+                                className="text-sm text-blue-600 hover:underline mt-1"
+                                onClick={() =>
                                     updateQuestion(idx, {
                                         ...q,
-                                        multiple: e.target.checked,
-                                        correctAnswers: e.target.checked
-                                            ? q.correctAnswers
-                                            : q.correctAnswers.slice(0, 1),
-                                    });
-                                }}
-                            />
-                        </div>
+                                        answers: [...q.answers, ""],
+                                    })
+                                }
+                            >
+                                + Варіант
+                            </button>
 
-                        <button
-                            className="mt-4 text-red-600"
-                            onClick={() => removeQuestion(idx)}
-                        >
-                            Видалити питання
-                        </button>
-                    </div>
-                ))}
+                            <div className="flex gap-2 mt-4">
+                                <button
+                                    onClick={() => removeQuestion(idx)}
+                                    className="px-3 py-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 text-sm"
+                                >
+                                    🗑️ Видалити
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <button
+                    className="mt-6 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-full text-sm transition"
+                    onClick={addQuestion}
+                >
+                    + Питання
+                </button>
             </div>
+
+            {message && <p className="text-green-600 mt-4">{message}</p>}
 
             <button
-                className="mt-6 px-4 py-2 bg-green-600 text-white rounded"
-                onClick={addQuestion}
+                className="mt-8 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg transition"
+                onClick={onSave}
             >
-                Додати питання
+                Зберегти модуль
             </button>
-
-            <div className="mt-4">
-                <button
-                    className="px-6 py-2 bg-blue-700 text-white rounded"
-                    onClick={onSave}
-                >
-                    Зберегти модуль
-                </button>
-                {message && <p className="mt-2 text-sm text-gray-600">{message}</p>}
-            </div>
         </div>
     );
 }

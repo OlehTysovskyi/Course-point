@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createCourse } from "../../../services/courseService";
+import { BackButton } from "../../../components/ui/BackButton";
 
 export default function CreateCoursePage() {
   const [title, setTitle] = useState("");
@@ -28,39 +29,51 @@ export default function CreateCoursePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Створити новий курс</h1>
+    <section className="max-w-3xl mx-auto px-4 py-10">
+      <h1 className="text-4xl font-extrabold text-blue-800 mb-6 text-center">Створити курс</h1>
 
-      <div className="mb-6">
-        <label className="block mb-1 font-medium">Назва курсу</label>
-        <input
-          type="text"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          className="w-full border px-4 py-2 rounded-md mb-4"
-          placeholder="Введіть назву курсу"
-          disabled={loading}
-        />
+      <div className="bg-white shadow-xl rounded-3xl p-6 space-y-6">
+        <div>
+          <label className="block text-lg font-semibold mb-2">Назва курсу</label>
+          <input
+            type="text"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Введіть назву курсу"
+            disabled={loading}
+          />
+        </div>
 
-        <label className="block mb-1 font-medium">Опис курсу</label>
-        <textarea
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          className="w-full border px-4 py-2 rounded-md"
-          placeholder="Введіть опис курсу"
+        <div>
+          <label className="block text-lg font-semibold mb-2">Опис курсу</label>
+          <textarea
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Введіть опис курсу"
+            disabled={loading}
+          />
+        </div>
+
+        {error && <p className="text-red-600 font-semibold">{error}</p>}
+
+        <button
+          onClick={handleCreate}
           disabled={loading}
-        />
+          className={`w-full py-3 text-lg font-semibold rounded-xl text-white transition ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 shadow-md"
+          }`}
+        >
+          {loading ? "Створюємо..." : "Створити курс"}
+        </button>
       </div>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-
-      <button
-        onClick={handleCreate}
-        disabled={loading}
-        className={`px-4 py-2 rounded-md text-white ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
-      >
-        {loading ? "Створюємо..." : "Створити"}
-      </button>
-    </div>
+      <div className="mt-10 text-center">
+        <BackButton />
+      </div>
+    </section>
   );
 }
