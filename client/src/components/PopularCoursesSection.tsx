@@ -57,14 +57,12 @@ export default function PopularCoursesSection() {
           className="relative bg-white/80 rounded-3xl shadow-2xl pt-20 px-10 pb-10 overflow-hidden
                      transition-transform duration-150 ease-in-out hover:scale-[1.02]"
         >
-          {/* Півовал заголовка */}
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/2 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-b-full flex items-center justify-center shadow-md">
             <h2 className="text-white text-xl sm:text-2xl md:text-3xl font-extrabold drop-shadow-md">
               Популярні курси
             </h2>
           </div>
 
-          {/* Сітка курсів */}
           <div className="mt-4 grid md:grid-cols-3 gap-8">
             {courses.map((course, index) => (
               <div
@@ -72,7 +70,6 @@ export default function PopularCoursesSection() {
                 onClick={() => navigate(`/view-course/${course._id}`)}
                 className="group cursor-pointer bg-white rounded-3xl shadow-md hover:shadow-2xl transition-shadow duration-300 flex min-h-[150px] overflow-hidden"
               >
-                {/* Ліва частина з номером */}
                 <div className="relative w-16 flex items-center justify-center bg-cyan-400 text-white font-bold text-3xl rounded-l-3xl select-none overflow-visible z-10 group-hover:animate-wiggle">
                   #{index + 1}
                   <div
@@ -91,7 +88,6 @@ export default function PopularCoursesSection() {
                   />
                 </div>
 
-                {/* Права частина з описом */}
                 <div className="p-6 ml-4 text-gray-700 flex flex-col justify-center w-[calc(100%-4rem)] max-h-[160px] overflow-hidden">
                   <h3 className="text-2xl font-semibold mb-2 text-indigo-900 truncate">
                     {course.title}
